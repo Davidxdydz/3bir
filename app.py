@@ -1,8 +1,32 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime
-from flask import Flask, flash, redirect, request, url_for, session, render_template
+from flask import Flask, flash, redirect, request, url_for, session
+import flask
 from flask_socketio import SocketIO
+import functools
+
+
+sock = """<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const socket = io();  // connects to the same origin automatically
+
+        socket.on("connect", () => {
+            console.log("Connected with SID:", socket.id);
+        });
+
+        socket.on("refresh", (data) => {
+            console.log("Refresh event:", data);
+        });
+    });
+</script>"""
+
+
+@functools.wraps(flask.render_template)
+def render_template(template_name: str, **context):
+    original = flask.render_template(template_name, **context)
+    return f"{sock}\n{original}"
 
 
 class TeamState(Enum):
@@ -87,11 +111,12 @@ def connect():
 def disconnect():
     team = session.get("team")
     conn_id = request.sid
-    if team.name in manager.connections:
-        manager.connections[team.name].remove(conn_id)
-        if not manager.connections[team.name]:
-            del manager.connections[team.name]
-    print(f"Team {team.name} disconnected from connection id {conn_id}")
+    name = team.name if team else None
+    if name in manager.connections:
+        manager.connections[name].remove(conn_id)
+        if not manager.connections[name]:
+            del manager.connections[name]
+    print(f"Team {name} disconnected from connection id {conn_id}")
 
 
 def request_refresh(teams: set[str], pages: list[str], redirect: str = None):
@@ -136,7 +161,10 @@ def login_post():
 
 
 @app.get("/login")
-def login_get(): ...
+def login_get():
+    if "team" in session:
+        return redirect(url_for("leaderboard"))
+    return render_template("login.html")
 
 
 @app.get("/logout")
