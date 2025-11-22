@@ -24,8 +24,8 @@ sock = """<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
 
 @functools.wraps(flask.render_template)
-def render_template(template_name: str, **context):
-    original = flask.render_template(template_name, **context)
+def render_template(template_name_or_list, **context):
+    original = flask.render_template(template_name_or_list, **context)
     return f"{sock}\n{original}"
 
 
@@ -35,6 +35,9 @@ class TeamState(Enum):
     MATCHED = "matched"
     READY_REQUEST = "ready_request"
     READY = "ready"
+    PLAYING = "playing"
+    SUBMIT_REQUEST = "submit_request"
+    SUBMITTED = "submitted"
 
 
 @dataclass
@@ -147,7 +150,7 @@ def login_post():
         new_team = Team(name=username, password=password, state=TeamState.INACTIVE, elo=1000)
         manager.teams[new_team.name] = new_team
         session["team"] = new_team
-    else:
+    elif "login" in request.form:
         username = request.form["username"]
         password = request.form["password"]
         team = manager.teams.get(username)
@@ -158,6 +161,13 @@ def login_post():
             flash("Wrong password")
             return redirect(url_for("login_get"))
         session["team"] = team
+    else:
+        flash("Invalid form submission")
+
+
+@app.get("/")
+def index_get():
+    return redirect(url_for("leaderboard"))
 
 
 @app.get("/login")
