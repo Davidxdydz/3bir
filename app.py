@@ -194,6 +194,12 @@ def game_get():
 
     team = manager.teams.get(team_name)
     template = gamestate_map.get(team.state, "game_states/unknown.html")
+    if team.state in (TeamState.MATCHED, TeamState.READY_REQUEST, TeamState.READY, TeamState.PLAYING, TeamState.SUBMIT_REQUEST, TeamState.SUBMITTED):
+        # the team is in a game, provide game info
+        for table in manager.tables:
+            game = table.active_game
+            if game and (game.team_a == team or game.team_b == team):
+                return render_template(template, team=team, game=game)
     return render_template(template, team=team)
 
 
