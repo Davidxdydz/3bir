@@ -162,25 +162,25 @@ def login_post():
         session["team"] = team.name
     else:
         flash("Invalid form submission")
-    return redirect(url_for(f"team/{session['team']}"))
+    return redirect(url_for("team_get", team_name=session["team"]))
 
 
 @app.get("/login")
 def login_get():
     if "team" in session:
-        return redirect(url_for("leaderboard"))
+        return redirect(url_for("team_get", team_name=session["team"]))
     return render_template("login.html")
 
 
 @app.get("/")
 def index_get():
-    return redirect(url_for("leaderboard"))
+    return redirect(url_for("leaderboard_get"))
 
 
 @app.get("/logout")
 def logout_get():
     session.pop("team", None)
-    return redirect(url_for("leaderboard"))
+    return redirect(url_for("leaderboard_get"))
 
 
 gamestate_map = {k: f"game_states/{k.value}.html" for k in TeamState}
@@ -206,7 +206,7 @@ def team_get(team_name: str):
     self_team_name = session.get("team")
     if team_name is None:
         flash("This team does not exist")
-        return redirect(url_for("leaderboard"))
+        return redirect(url_for("leaderboard_get"))
     team = manager.teams.get(team_name)
     editable = self_team_name == team_name
     return render_template("team.html", team=team, editable=editable)
