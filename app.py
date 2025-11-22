@@ -79,6 +79,7 @@ class Manager:
 
 
 app = Flask(__name__)
+app.secret_key = "your-secret-key"
 socketio = SocketIO(app)
 manager = Manager()
 
