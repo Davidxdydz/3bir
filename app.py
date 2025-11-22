@@ -76,6 +76,7 @@ class Manager:
     tables: list[Table] = field(default_factory=list)
     past_games: list[Game] = field(default_factory=list)
     connections: dict[str, list[str]] = field(default_factory=dict)  # team name -> [connection id]
+    searching_teams: set[str] = field(default_factory=set)
 
 
 app = Flask(__name__)
@@ -177,8 +178,8 @@ def index_get():
     return redirect(url_for("leaderboard_get"))
 
 
-@app.get("/logout")
-def logout_get():
+@app.post("/logout")
+def logout_post():
     session.pop("team", None)
     return redirect(url_for("leaderboard_get"))
 
@@ -204,7 +205,16 @@ def game_get():
 
 
 @app.post("/game")
-def game_post(): ...
+def game_post():
+    team_name = session.get("team")
+    if team_name is None:
+        flash("You must be logged in to perform this action")
+        return redirect(url_for("login_get"))
+    team = manager.teams.get(team_name)
+
+    if "start_search" in request.form:
+        team.state = TeamState.SEARCHING
+        manager.searching_teams.add(team.name)
 
 
 @app.get("/team/<string:team_name>")
@@ -216,6 +226,11 @@ def team_get(team_name: str):
     team = manager.teams.get(team_name)
     editable = self_team_name == team_name
     return render_template("team.html", team=team, editable=editable)
+
+
+@app.get("/schedule")
+def schedule_get():
+    return render_template("schedule.html", tables=manager.tables)
 
 
 @app.get("/leaderboard")
