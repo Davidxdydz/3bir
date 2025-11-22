@@ -219,7 +219,7 @@ def team_get(team_name: str):
 
 
 @app.get("/leaderboard")
-def leaderboard():
+def leaderboard_get():
     teams = sorted(manager.teams.values(), key=lambda t: t.elo, reverse=True)
     return render_template("leaderboard.html", teams=teams)
 
