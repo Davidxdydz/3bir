@@ -18,6 +18,16 @@ sock = """<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
         socket.on("refresh", (data) => {
             console.log("Refresh event:", data);
+            let currentPage = window.location.pathname.split("/").pop();
+            if (data.pages.includes(currentPage) || data.pages.includes("*")) {
+                console.log("Refreshing page:", currentPage);
+                window.location.reload();
+                return;
+            }
+            if (data.redirect) {
+                window.location.href = data.redirect;
+                return;
+            }            
         });
     });
 </script>"""
@@ -73,10 +83,12 @@ class Table:
 @dataclass
 class Manager:
     teams: dict[str, Team] = field(default_factory=dict)
-    tables: list[Table] = field(default_factory=list)
+    table: Table = field(default_factory=Table)
     past_games: list[Game] = field(default_factory=list)
     connections: dict[str, list[str]] = field(default_factory=dict)  # team name -> [connection id]
     searching_teams: set[str] = field(default_factory=set)
+
+    def schedule_game(self, game: Game): ...
 
 
 app = Flask(__name__)
@@ -122,10 +134,10 @@ def disconnect():
     print(f"Team {team_name} disconnected from connection id {conn_id}")
 
 
-def request_refresh(teams: set[str], pages: list[str], redirect: str = None):
-    if None in teams:
-        teams = set(manager.teams.keys())
-    for team_name in teams:
+def request_refresh(team_names: set[str], pages: list[str], redirect: str = None):
+    if None in team_names:
+        team_names = set(manager.teams.keys())
+    for team_name in team_names:
         if team_name in manager.connections:
             for conn_id in manager.connections[team_name]:
                 socketio.emit(
@@ -194,13 +206,11 @@ def game_get():
         return render_template("game_states/not_logged_in.html")
 
     team = manager.teams.get(team_name)
-    template = gamestate_map.get(team.state, "game_states/unknown.html")
+    template = gamestate_map.get(team.state)
     if team.state in (TeamState.MATCHED, TeamState.READY_REQUEST, TeamState.READY, TeamState.PLAYING, TeamState.SUBMIT_REQUEST, TeamState.SUBMITTED):
-        # the team is in a game, provide game info
-        for table in manager.tables:
-            game = table.active_game
-            if game and (game.team_a == team or game.team_b == team):
-                return render_template(template, team=team, game=game)
+        game = manager.table.active_game
+        if game and (game.team_a == team or game.team_b == team):
+            return render_template(template, team=team, game=game)
     return render_template(template, team=team)
 
 
@@ -215,6 +225,19 @@ def game_post():
     if "start_search" in request.form:
         team.state = TeamState.SEARCHING
         manager.searching_teams.add(team.name)
+        if len(manager.searching_teams) >= 2:
+            team_a = manager.teams[manager.searching_teams.pop()]
+            team_b = manager.teams[manager.searching_teams.pop()]
+            game = Game(
+                team_a=team_a,
+                team_b=team_b,
+                state=GameState.WAIT_READY,
+                start_time=datetime.now(),
+            )
+            manager.schedule_game(game)
+            team_a.state = TeamState.MATCHED
+            team_b.state = TeamState.MATCHED
+            request_refresh({team_a.name, team_b.name}, ["game"], redirect=None)
 
 
 @app.get("/team/<string:team_name>")
@@ -230,7 +253,7 @@ def team_get(team_name: str):
 
 @app.get("/schedule")
 def schedule_get():
-    return render_template("schedule.html", tables=manager.tables)
+    return render_template("schedule.html", table=manager.table)
 
 
 @app.get("/leaderboard")
