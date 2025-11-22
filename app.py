@@ -162,7 +162,7 @@ def login_post():
         session["team"] = team.name
     else:
         flash("Invalid form submission")
-    return redirect(url_for("team"))
+    return redirect(url_for(f"team/{session['team']}"))
 
 
 @app.get("/login")
