@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<div class="team-container">
+    <h2>Team: {{ team.name }}</h2>
+    <p>ELO: {{ team.elo }}</p>
+    <p>Status: {{ team.state }}</p>
+
+
+    {% if editable %}
+    <div class="team-edit">
+        <h3>Edit Team</h3>
+        <form method="POST" action="/team/{{ team.name }}/edit">
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" placeholder="New password" />
+            <button type="submit">Update</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
