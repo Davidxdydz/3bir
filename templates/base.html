@@ -13,7 +13,9 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <ul>
-            <li><a href="/login">Login</a></li>
+            {% if session.get('team') %}
+            <li><a href="/team/{{ session.get('team') }}">Team</a></li>
+            {% endif %}
             <li><a href="/game">Game</a></li>
             <li><a href="/schedule">Schedule</a></li>
             <li><a href="/leaderboard">Leaderboard</a></li>
@@ -22,6 +24,8 @@
                 <form method="POST" action="/logout" style="display:inline;"><button type="submit"
                         class="logout-btn">Log out</button></form>
             </li>
+            {% else %}
+            <li><a href="/login">Login</a></li>
             {% endif %}
         </ul>
     </nav>
