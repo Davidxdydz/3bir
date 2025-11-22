@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="leaderboard-container">
+    <h2>Leaderboard</h2>
+    {% if teams %}
+    <table class="leaderboard-table">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Team Name</th>
+                <th>ELO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team in teams %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ team.name }}</td>
+                <td>{{ team.elo }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No teams available.</p>
+    {% endif %}
+</div>
+{% endblock %}
