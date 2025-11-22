@@ -102,25 +102,23 @@ def is_valid(username: str, password: str, confirm_password: str) -> str | None:
 
 @socketio.on("connect")
 def connect():
-    team = session.get("team")
+    team_name = session.get("team")
     conn_id = request.sid
-    name = team.name if team else None
-    if name not in manager.connections:
-        manager.connections[name] = []
-    manager.connections[name].append(conn_id)
-    print(f"Team {name} connected with connection id {conn_id}, {sum(len(v) for v in manager.connections.values())} total connections")
+    if team_name not in manager.connections:
+        manager.connections[team_name] = []
+    manager.connections[team_name].append(conn_id)
+    print(f"Team {team_name} connected with connection id {conn_id}, {sum(len(v) for v in manager.connections.values())} total connections")
 
 
 @socketio.on("disconnect")
 def disconnect():
-    team = session.get("team")
+    team_name = session.get("team")
     conn_id = request.sid
-    name = team.name if team else None
-    if name in manager.connections:
-        manager.connections[name].remove(conn_id)
-        if not manager.connections[name]:
-            del manager.connections[name]
-    print(f"Team {name} disconnected from connection id {conn_id}")
+    if team_name in manager.connections:
+        manager.connections[team_name].remove(conn_id)
+        if not manager.connections[team_name]:
+            del manager.connections[team_name]
+    print(f"Team {team_name} disconnected from connection id {conn_id}")
 
 
 def request_refresh(teams: set[str], pages: list[str], redirect: str = None):
@@ -150,7 +148,7 @@ def login_post():
             return redirect(url_for("login_get"))
         new_team = Team(name=username, password=password, state=TeamState.INACTIVE, elo=1000)
         manager.teams[new_team.name] = new_team
-        session["team"] = new_team
+        session["team"] = new_team.name
     elif "login" in request.form:
         username = request.form["username"]
         password = request.form["password"]
@@ -161,14 +159,10 @@ def login_post():
         if team.password != password:
             flash("Wrong password")
             return redirect(url_for("login_get"))
-        session["team"] = team
+        session["team"] = team.name
     else:
         flash("Invalid form submission")
-
-
-@app.get("/")
-def index_get():
-    return redirect(url_for("leaderboard"))
+    return redirect(url_for("team"))
 
 
 @app.get("/login")
@@ -178,20 +172,43 @@ def login_get():
     return render_template("login.html")
 
 
+@app.get("/")
+def index_get():
+    return redirect(url_for("leaderboard"))
+
+
 @app.get("/logout")
 def logout_get():
     session.pop("team", None)
     return redirect(url_for("leaderboard"))
 
 
+gamestate_map = {k: f"game_states/{k.value}.html" for k in TeamState}
+
+
 @app.get("/game")
-def game_get(): ...
+def game_get():
+    team_name = session.get("team")
+    if team_name is None:
+        return render_template("game_states/not_logged_in.html")
+
+    team = manager.teams.get(team_name)
+    template = gamestate_map.get(team.state, "game_states/unknown.html")
+    return render_template(template, team=team)
+
+
+@app.post("/game")
+def game_post(): ...
 
 
 @app.get("/team/<string:team_name>")
 def team_get(team_name: str):
+    self_team_name = session.get("team")
+    if team_name is None:
+        flash("This team does not exist")
+        return redirect(url_for("leaderboard"))
     team = manager.teams.get(team_name)
-    editable = session.get("team").name == team_name
+    editable = self_team_name == team_name
     return render_template("team.html", team=team, editable=editable)
 
 
