@@ -8,6 +8,25 @@
 </head>
 
 <body>
+
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="/login">Login</a></li>
+            <li><a href="/game">Game</a></li>
+            <li><a href="/schedule">Schedule</a></li>
+            <li><a href="/leaderboard">Leaderboard</a></li>
+            {% if session.get('team') %}
+            <li>
+                <form method="POST" action="/logout" style="display:inline;"><button type="submit"
+                        class="logout-btn">Log out</button></form>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+
     {% with messages = get_flashed_messages() %}
     {% if messages %}
     <div class="flash-messages">
