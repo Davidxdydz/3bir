@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="schedule-container">
+    <h2>Upcoming Games</h2>
+    {% if tables %}
+    <table class="games-table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Team 1</th>
+                <th>Team 2</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for table in tables %}
+            {% if table.active_game %}
+            <tr>
+                <td>{{ table.active_game.time }}</td>
+                <td>{{ table.active_game.team1.name }}</td>
+                <td>{{ table.active_game.team2.name }}</td>
+            </tr>
+            {% endif %}
+            {% for game in table.scheduled_games %}
+            <tr>
+                <td>{{ game.time }}</td>
+                <td>{{ game.team1.name }}</td>
+                <td>{{ game.team2.name }}</td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No scheduled games at the moment.</p>
+    {% endif %}
+</div>
+{% endblock %}
