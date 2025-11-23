@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background-color: #020617;
+        color: #e2e8f0;
+    }
+
+    body {
+        min-height: 100vh;
+        background-image: radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.25), transparent 45%),
+            radial-gradient(circle at 80% 0%, rgba(168, 85, 247, 0.2), transparent 45%),
+            linear-gradient(180deg, #020617 0%, #030712 100%);
+        color: inherit;
+    }
+
+    ::selection {
+        background-color: rgb(14 165 233);
+        color: #0f172a;
+    }
+
+    .nav-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-scroll {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+}
+
+@layer components {
+    .panel {
+        @apply rounded-3xl border border-white/10 bg-white/5 px-6 py-6 shadow-card backdrop-blur-2xl space-y-6 sm:px-8 sm:py-8;
+    }
+
+    .page-shell {
+        @apply space-y-8 sm:space-y-10;
+    }
+
+    .primary-btn {
+        @apply inline-flex items-center justify-center rounded-2xl bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-400;
+    }
+
+    .secondary-btn {
+        @apply inline-flex items-center justify-center rounded-2xl border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-white hover:text-white;
+    }
+
+    .nav-pill {
+        @apply rounded-2xl px-3 py-1.5 text-xs uppercase tracking-wide text-white/70 transition hover:text-white;
+    }
+
+    .nav-pill.is-active {
+        @apply bg-white/10 text-white shadow-inner shadow-white/20;
+    }
+
+    .nav-scroll {
+        @apply flex w-full items-center gap-2 overflow-x-auto rounded-2xl border border-white/5 bg-white/5 p-2 text-sm text-slate-200 sm:w-auto sm:border-0 sm:bg-transparent sm:p-0;
+    }
+
+    .pill {
+        @apply inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/70;
+    }
+
+    .stat-chip {
+        @apply flex w-full flex-col gap-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-left shadow-card sm:w-auto;
+    }
+
+    .page-heading {
+        @apply text-3xl font-display text-white tracking-tight sm:text-4xl;
+    }
+
+    .section-subtitle {
+        @apply text-sm uppercase tracking-[0.3em] text-white font-bold;
+    }
+
+    .muted {
+        @apply text-sm text-slate-400;
+    }
+
+    .section-split {
+        @apply flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between;
+    }
+
+    .table-scroll {
+        @apply overflow-x-auto;
+    }
+
+    .form-label {
+        @apply mb-1 block text-sm text-white/80;
+    }
+
+    .form-input {
+        @apply block w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 focus:border-brand-400 focus:outline-none;
+    }
+
+    .form-textarea {
+        @apply w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 focus:border-brand-400 focus:outline-none;
+    }
+
+    .score-card {
+        @apply rounded-3xl border border-white/10 bg-white/5 p-6 text-center;
+    }
+
+    .score-label {
+        @apply text-sm uppercase tracking-[0.3em] text-white/60;
+    }
+
+    .score-value {
+        @apply mt-2 text-5xl font-display text-white;
+    }
+
+    .info-banner {
+        @apply rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70;
+    }
+
+    .header-shell {
+        @apply sticky top-0 z-40 border-b border-white/5 bg-slate-950/90 backdrop-blur-xl;
+    }
+
+    .header-container {
+        @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+    }
+
+    .header-inner {
+        @apply flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 shadow-card sm:px-5 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between;
+    }
+}
