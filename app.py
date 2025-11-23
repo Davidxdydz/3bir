@@ -104,6 +104,16 @@ class Game:
     team_a_score: int = 0
     team_b_score: int = 0
 
+    @property
+    def expected_start_time(self):
+        return self.get_ready_time + ready_lead_time
+
+    @property
+    def expected_end_time(self):
+        if self.start_time is None:
+            return self.expected_start_time + game_length
+        return self.start_time + game_length
+
     def get_ready(self):
         self.team_a.state = TeamState.READY_REQUEST
         self.team_b.state = TeamState.READY_REQUEST
@@ -321,6 +331,7 @@ def game_post():
         if both_ready:
             game.team_a.state = TeamState.PLAYING
             game.team_b.state = TeamState.PLAYING
+            game.start_time = datetime.now()
         request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
     if "done" in request.form:
         team.state = TeamState.DONE
@@ -329,6 +340,7 @@ def game_post():
         if both_done:
             game.team_a.state = TeamState.SUBMIT_REQUEST
             game.team_b.state = TeamState.SUBMIT_REQUEST
+            game.end_time = datetime.now()
         request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
     if "submit" in request.form:
         team.state = TeamState.SUBMITTED
@@ -351,11 +363,11 @@ def game_post():
                 flash("Scores do not match, please resubmit")
                 game.team_a.state = TeamState.SUBMIT_REQUEST
                 game.team_b.state = TeamState.SUBMIT_REQUEST
-
+                request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
         else:
             game.team_a_score = int(request.form["team_a_score"])
             game.team_b_score = int(request.form["team_b_score"])
-        request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
+            # request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
     return redirect(url_for("game_get"))
 
 
@@ -396,6 +408,40 @@ def schedule_get():
 def leaderboard_get():
     teams = sorted(manager.teams.values(), key=lambda t: t.elo, reverse=True)
     return render_template("leaderboard.html", teams=teams)
+
+
+def get_latest_game(team: Team):
+    for game in reversed(manager.past_games):
+        if game.team_a == team or game.team_b == team:
+            return game
+    return None
+
+
+@app.get("/result")
+def result_get():
+    team_name = session.get("team")
+    if team_name is None:
+        flash("You must be logged in to view results")
+        return redirect(url_for("login_get"))
+    latest_game = get_latest_game(manager.teams[team_name])
+    if latest_game is None:
+        flash("You have no completed games")
+        return redirect(url_for("game_get"))
+    if latest_game.team_a_score > latest_game.team_b_score:
+        winner = latest_game.team_a.name
+        loser = latest_game.team_b.name
+    elif latest_game.team_a_score < latest_game.team_b_score:
+        winner = latest_game.team_b.name
+        loser = latest_game.team_a.name
+    else:
+        winner = None
+        loser = None
+    if winner is None:
+        return render_template("draw.html", game=latest_game, team=manager.teams[team_name])
+    if team_name == winner:
+        return render_template("win.html", game=latest_game, team=manager.teams[team_name])
+    else:
+        return render_template("lose.html", game=latest_game, team=manager.teams[team_name])
 
 
 if __name__ == "__main__":

@@ -6,11 +6,25 @@
     <div class="panel text-center">
         <p class="section-subtitle">Locked in</p>
         <h1 class="page-heading">Waiting on opponent</h1>
-        <p class="text-base text-slate-300">You’re marked as ready. The match will start when both teams confirm.</p>
+        <p class="text-base text-slate-300">[TODO RULES] You’re marked as ready. The match will start when both teams
+            confirm.</p>
         <div class="info-banner">{{ game.team_a.name }} serves first. The timer begins once both teams are ready.
+            <p>setup time is up in:
+            <div id="timer">00:00:00</div>
+            </p>
         </div>
         <button type="button" disabled class="secondary-btn w-full justify-center py-3 text-base text-white/60">Ready
             confirmed</button>
     </div>
+
+    <form method="POST" action="/game">
+        <button type="submit" name="ready" class="btn-ready" disabled>We are ready!</button>
+    </form>
 </div>
+<script>
+    let displayElement = document.getElementById("timer");
+    let targetTime = new Date("{{ game.expected_start_time }}");
+
+    {% include 'countdown_function.js' %}
+</script>
 {% endblock %}

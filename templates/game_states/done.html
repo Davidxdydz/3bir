@@ -6,8 +6,11 @@
 <div class="mx-auto max-w-4xl">
     <div class="panel">
         <p class="section-subtitle">Wrap up</p>
+        <p>remaining gaming time:
+        <div id="timer">00:00:00</div>
+        </p>
         <h1 class="page-heading">{{ game.team_a.name }} vs {{ game.team_b.name }}</h1>
-        <p class="text-base text-slate-300">Waiting for both captains to confirm the match is complete.</p>
+        <p class="text-base text-slate-300">Waiting for both teams to confirm the match is complete.</p>
         <div class="grid gap-6 md:grid-cols-2">
             <div class="score-card">
                 <p class="score-label">{{ game.team_a.name }}</p>
@@ -22,5 +25,11 @@
             for opponent...</button>
     </div>
 </div>
+<script>
+    let displayElement = document.getElementById("timer");
+    let targetTime = new Date("{{ game.expected_end_time }}");
+
+    {% include 'countdown_function.js' %}
+</script>
 
 {% endblock %}

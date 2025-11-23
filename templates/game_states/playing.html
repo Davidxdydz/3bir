@@ -2,11 +2,14 @@
 
 
 {% block content %}
-
 <div class="mx-auto max-w-4xl">
     <div class="panel">
+        <p>remaining gaming time:
+        <div id="timer">00:00:00</div>
+        </p>
         <p class="section-subtitle">In play</p>
         <h1 class="page-heading">{{ game.team_a.name }} vs {{ game.team_b.name }}</h1>
+
         <p class="text-base text-slate-300">Monitor the score and submit the final result when the game ends.</p>
         <div class="grid gap-6 md:grid-cols-2">
             <div class="score-card">
@@ -25,5 +28,11 @@
         </form>
     </div>
 </div>
+<script>
+    let displayElement = document.getElementById("timer");
+    let targetTime = new Date("{{ game.expected_end_time }}");
+
+    {% include 'countdown_function.js' %}
+</script>
 
 {% endblock %}

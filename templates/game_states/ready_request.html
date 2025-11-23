@@ -6,6 +6,9 @@
     <div class="panel">
         <p class="section-subtitle">Ready check</p>
         <h1 class="page-heading">{{ game.team_a.name }} serves first</h1>
+        <p>remaining setup time:
+        <div id="timer">00:00:00</div>
+        </p>
         <p class="text-base text-slate-300">Set up the table, verify cups, and ensure balls are clean. Let us know once
             you’re staged—the timer won’t start until both teams confirm.</p>
         <ul class="space-y-3 text-sm text-white/80">
@@ -22,4 +25,10 @@
         </form>
     </div>
 </div>
+<script>
+    let displayElement = document.getElementById("timer");
+    let targetTime = new Date("{{ game.expected_start_time }}");
+
+    {% include 'countdown_function.js' %}
+</script>
 {% endblock %}
