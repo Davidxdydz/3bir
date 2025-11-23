@@ -5,7 +5,7 @@ from flask import Flask, flash, redirect, request, url_for, session
 import flask
 from flask_socketio import SocketIO
 import functools
-
+from threading import Timer
 
 sock = """<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
@@ -82,6 +82,17 @@ class Team:
     elo_history: list = field(default_factory=lambda: [1000])
 
 
+def exec_at(dt: datetime, func, *args, **kwargs):
+    delay = (dt - datetime.now()).total_seconds()
+    if delay < 0:
+        delay = 0
+    Timer(delay, func, args=args, kwargs=kwargs).start()
+
+
+game_length = timedelta(minutes=12)
+ready_lead_time = timedelta(minutes=3)
+
+
 @dataclass
 class Game:
     team_a: Team
@@ -94,6 +105,14 @@ class Game:
     @property
     def get_ready_time(self) -> datetime:
         return self.start_time - timedelta(minutes=3)
+
+    def get_ready(self):
+        self.team_a.state = TeamState.READY_REQUEST
+        self.team_b.state = TeamState.READY_REQUEST
+        request_refresh({self.team_a.name, self.team_b.name}, ["/game"], redirect="/game")
+        # TODO kick the teams if they don't ready up in time
+        # TODO end game when time is up
+        # TODO add a timer for submission
 
 
 @dataclass
@@ -111,7 +130,14 @@ class Manager:
     searching_teams: set[str] = field(default_factory=set)
 
     def schedule_game(self, game: Game):
-        self.table.active_game = game
+        if self.table.active_game is not None:
+            self.table.active_game = game
+            game.start_time = datetime.now() + ready_lead_time
+            game.end_time = game.start_time + game_length
+        else:
+            print("omg what the hell im literally shaking and crying rn")
+            raise Exception("There is already an active game")
+        exec_at(game.get_ready_time, game.get_ready)
 
 
 app = Flask(__name__)
