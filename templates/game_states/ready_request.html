@@ -4,12 +4,13 @@
 {% block content %}
 <div class="mx-auto max-w-3xl">
     <div class="panel">
-        <p class="section-subtitle">Ready check</p>
-        <h1 class="page-heading">{{ game.team_a.name }} serves first</h1>
+        <p class="section-subtitle">Game preparation</p>
+        <h1 class="page-heading">Team {{ game.team_a.name }} starts</h1>
         <p>remaining setup time:
         <div id="timer">00:00:00</div>
         </p>
-        <p class="text-base text-slate-300">Set up the table, verify cups, and ensure balls are clean. Let us know once
+        <p class="text-base text-slate-300">[TODO RULES] Set up the table, verify cups, and ensure balls are clean. Let
+            us know once
             you’re staged—the timer won’t start until both teams confirm.</p>
         <ul class="space-y-3 text-sm text-white/80">
             <li class="flex items-start gap-3"><span class="mt-1 h-2 w-2 rounded-full bg-brand-400"></span>Table
