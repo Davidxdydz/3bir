@@ -2,4 +2,25 @@
 
 
 {% block content %}
+<div class="game-container">
+    <form method="POST" action="/game">
+        <div class="team-inputs">
+            <div class="team-field">
+                <label for="team_a_score">{{ game.team_a.name }} hits:</label>
+                <input type="number" id="team_a_score" name="team_a_score" min="0" required>
+                <span>cups</span>
+            </div>
+
+
+            <div class="team-field">
+                <label for="team_b_score">{{ game.team_b.name }} hits:</label>
+                <input type="number" id="team_b_score" name="team_b_score" min="0" required>
+                <span>cups</span>
+            </div>
+        </div>
+
+
+        <button type="submit" name="submit" class="btn-submit">Submit</button>
+    </form>
+</div>
 {% endblock %}
