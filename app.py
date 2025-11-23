@@ -130,7 +130,7 @@ class Manager:
     searching_teams: set[str] = field(default_factory=set)
 
     def schedule_game(self, game: Game):
-        if self.table.active_game is not None:
+        if self.table.active_game is None:
             self.table.active_game = game
             game.start_time = datetime.now() + ready_lead_time
             game.end_time = game.start_time + game_length
