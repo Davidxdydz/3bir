@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ title or "Hackapong Control Room" }}</title>
+    <title>{{ title or "Hackapong" }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -27,8 +27,6 @@
                     <div class="header-inner">
                         <div class="flex flex-col gap-1">
                             <p class="text-xs uppercase tracking-[0.3em] text-brand-200">Hackapong</p>
-                            <a href="{{ url_for('leaderboard_get') }}"
-                                class="text-2xl font-display font-semibold text-white">Control Center</a>
                         </div>
 
                         {% set current = request.path %}
