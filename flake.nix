@@ -16,8 +16,8 @@
       system:
       let
         pkgs = import nixpkgs { inherit system; };
-        myApp = pkgs.python312Packages.buildPythonApplication {
-          pname = "flask-nix-server";
+        bir3 = pkgs.python312Packages.buildPythonApplication {
+          pname = "bir3";
           version = "0.1.0";
           src = ./.;
           format = "pyproject";
@@ -72,13 +72,13 @@
               ]
             ))
             pyright
-            myApp
+            bir3
           ];
         };
-        packages.default = myApp;
+        packages.default = bir3;
         apps.default = {
           type = "app";
-          program = "${myApp}/bin/start-server";
+          program = "${bir3}/bin/start-server";
         };
       }
     );
