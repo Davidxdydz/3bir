@@ -3,7 +3,7 @@
 {% block content %}
 <div class="schedule-container">
     <h2>Upcoming Games</h2>
-    {% if tables %}
+    {% if table %}
     <table class="games-table">
         <thead>
             <tr>
@@ -13,7 +13,6 @@
             </tr>
         </thead>
         <tbody>
-            {% for table in tables %}
             {% if table.active_game %}
             <tr>
                 <td>{{ table.active_game.time }}</td>
@@ -27,7 +26,6 @@
                 <td>{{ game.team1.name }}</td>
                 <td>{{ game.team2.name }}</td>
             </tr>
-            {% endfor %}
             {% endfor %}
         </tbody>
     </table>
