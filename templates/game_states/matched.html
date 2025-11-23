@@ -5,8 +5,13 @@
 <div class="game-container">
     <h2> Match found!</h2>
     <p>{{ game.team_a.name }} against {{ game.team_b.name }}</p>
-    <p>scheduled for {{ game.start_time }}</p>
-    <p>remaining time :[[TODO]] minutes </p>
+    <p>scheduled for {{ game.get_ready_time }}</p>
+    <p>remaining time <div id="timer">00:00</div> minutes </p>
 
 </div>
 {% endblock %}
+<script>
+    let timer = document.getElementByID("timer");
+    let get_ready_time = {{ game.get_ready_time }};
+    let timer.innerHTML = "get_ready_time";
+</script>
