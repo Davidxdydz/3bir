@@ -29,5 +29,5 @@ jobs:
       - name: Push Docker image to GitHub Container Registry
         run: |
           ./result | docker load
-          docker tag bir3:latest ghcr.io/${{ github.repository }}:latest
-          docker push ghcr.io/${{ github.repository }}:latest
+          docker tag 3bir:latest ghcr.io/davidxdydz/3bir:latest
+          docker push ghcr.io/davidxdydz/3bir:latest
