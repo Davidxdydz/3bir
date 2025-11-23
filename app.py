@@ -339,6 +339,7 @@ def game_post():
         if both_done:
             game.team_a.state = TeamState.SUBMIT_REQUEST
             game.team_b.state = TeamState.SUBMIT_REQUEST
+            game.start_time = datetime.now()
         request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
     if "submit" in request.form:
         team.state = TeamState.SUBMITTED
