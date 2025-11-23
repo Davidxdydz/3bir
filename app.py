@@ -321,8 +321,8 @@ def game_post():
                     manager.past_games.append(game)
                     manager.table.active_game = None
                     request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
-                    request_refresh([None], ["leaderboard"], redirect=None)
-                    # TODO win page, elo updates
+                    request_refresh([None], ["/leaderboard"], redirect=None)
+                    # TODO win page
                     update_elo(game)
                 else:
                     flash("Scores do not match, please resubmit")
@@ -333,7 +333,7 @@ def game_post():
             game.team_a_score = int(request.form["team_a_score"])
             game.team_b_score = int(request.form["team_b_score"])
             request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
-    return "", 200
+    return redirect(url_for("game_get"))
 
 
 @app.get("/team/<string:team_name>")
