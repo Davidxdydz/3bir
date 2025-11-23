@@ -6,14 +6,11 @@
 
 <div class="page-shell">
     <section class="panel">
-        <p class="section-subtitle">Table status</p>
+        <p class="section-subtitle">Live</p>
         <div class="section-split">
-            <div>
-                <h1 class="page-heading">Live schedule</h1>
-            </div>
             <div class="flex items-center gap-4">
                 <div class="pill">{{ 'active match' if active else 'idle' }}</div>
-                <div class="rounded-2xl border border-white/10 px-4 py-2 text-sm text-white/70">
+                <div class="pill">
                     {{ upcoming|length }} queued
                 </div>
             </div>
@@ -59,8 +56,7 @@
     <section class="panel space-y-0 overflow-hidden p-0">
         <div class="flex items-center justify-between px-6 py-4">
             <div>
-                <p class="section-subtitle">Queue</p>
-                <h2 class="text-2xl font-semibold text-white">Full schedule</h2>
+                <p class="section-subtitle">Schedule</p>
             </div>
         </div>
         <div class="table-scroll">

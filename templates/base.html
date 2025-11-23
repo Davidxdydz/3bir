@@ -28,15 +28,19 @@
                         <div class="flex flex-col gap-1">
                             <p class="text-xs uppercase tracking-[0.3em] text-brand-200">Hackapong</p>
                             <a href="{{ url_for('leaderboard_get') }}"
-                                class="text-2xl font-display font-semibold text-white">Control Room</a>
+                                class="text-2xl font-display font-semibold text-white">Control Center</a>
                         </div>
 
+                        {% set current = request.path %}
                         <div
-                            class="order-2 flex h-10 w-full flex-nowrap items-center gap-3 border-t border-white/10 pt-3 sm:border-0 sm:pt-0 lg:order-none lg:w-auto">
+                            class="order-2 flex h-10 w-full flex-nowrap items-center gap-3 pt-3 sm:border-0 sm:pt-0 lg:order-none lg:w-auto">
                             {% if session.get('team') %}
                             <div class="flex-1 items-center rounded-2xl px-3 text-s">
-                                <span class="text-white/70">Signed in</span>
-                                <span class="font-semibold text-white px-3">{{ session.get('team') }}</span>
+                                <a href="{{ url_for('team_get', team_name=session.get('team')) }}"
+                                    class="nav-pill {{ 'is-active' if current.startswith('/team') }}">
+                                    <span class="text-white/70">Signed in</span>
+                                    <span class="font-semibold text-white px-3">{{ session.get('team') }}</span>
+                                </a>
                             </div>
 
                             <form method="POST" action="{{ url_for('logout_post') }}" class="flex items-center">
@@ -49,21 +53,16 @@
                         </div>
 
                         <nav class="nav-scroll order-3 lg:order-none">
-                            {% set current = request.path %}
-                            {% if session.get('team') %}
-                            <a href="{{ url_for('team_get', team_name=session.get('team')) }}"
-                                class="nav-pill {{ 'is-active' if current.startswith('/team') }}">Team</a>
-                            {% endif %}
                             <a href="{{ url_for('game_get') }}"
                                 class="nav-pill {{ 'is-active' if current.startswith('/game') }}">Game</a>
                             <a href="{{ url_for('schedule_get') }}"
                                 class="nav-pill {{ 'is-active' if current.startswith('/schedule') }}">Schedule</a>
                             <a href="{{ url_for('leaderboard_get') }}"
                                 class="nav-pill {{ 'is-active' if current.startswith('/leaderboard') or current == '/' }}">Leaderboard</a>
-                            {% if not session.get('team') %}
+                            <!-- {% if not session.get('team') %}
                             <a href="{{ url_for('login_get') }}"
                                 class="nav-pill {{ 'is-active' if current.startswith('/login') }}">Login</a>
-                            {% endif %}
+                            {% endif %} -->
                         </nav>
                     </div>
                 </div>

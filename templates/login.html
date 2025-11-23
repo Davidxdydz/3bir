@@ -3,9 +3,8 @@
 {% block content %}
 <div class="grid gap-8 lg:grid-cols-2">
     <section class="panel">
-        <p class="section-subtitle">Welcome back</p>
-        <h1 class="page-heading">Log in</h1>
-        <p class="muted">Submit scores and review standings from this dashboard.</p>
+        <p class="section-subtitle">Log in</p>
+        <!-- <h1 class="page-heading">Log in</h1> -->
 
         <form method="POST" action="{{ url_for('login_post') }}" class="space-y-4">
             <div>
@@ -23,7 +22,7 @@
 
     <section class="panel">
         <p class="section-subtitle">New team</p>
-        <h2 class="page-heading text-3xl">Create a team</h2>
+        <!-- <h2 class="page-heading text-3xl">Create a team</h2> -->
         <p class="muted">Register once and keep the same credentials for the rest of the event.</p>
 
         <form method="POST" action="{{ url_for('login_post') }}" class="space-y-4">

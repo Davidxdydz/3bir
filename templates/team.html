@@ -6,9 +6,8 @@
     <section class="panel">
         <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
-                <p class="section-subtitle">Team overview</p>
-                <h1 class="page-heading">{{ team.name }}</h1>
-                <p class="muted">Currently {{ team.state.value.replace('_', ' ') if team.state else 'inactive' }}</p>
+                <p class="section-subtitle">Team {{ team.name }} overview</p>
+                <p class="muted">currently {{ team.state.value.replace('_', ' ') if team.state else 'inactive' }}</p>
             </div>
             <div class="flex flex-wrap gap-4">
                 <div class="stat-chip">
@@ -30,7 +29,6 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="section-subtitle">About</p>
-                    <h2 class="text-2xl font-semibold text-white">Details</h2>
                 </div>
                 {% if editable %}
                 <span class="pill">editable</span>
@@ -52,7 +50,6 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="section-subtitle">Recent games</p>
-                    <h2 class="text-xl font-semibold text-white">Match history</h2>
                 </div>
             </div>
             {% if team.match_history %}
