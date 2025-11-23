@@ -5,8 +5,14 @@
 <div class="game-container">
     <h2> Match found!</h2>
     <p>{{ game.team_a.name }} against {{ game.team_b.name }}</p>
-    <p>scheduled for {{ game.start_time }}</p>
-    <p>remaining time :[[TODO]] minutes </p>
+    <p>scheduled for {{ game.get_ready_time }}</p>
+    <p>remaining time <div id="timer">00:00:00</div> minutes </p>
 
 </div>
+<script>
+    let displayElement = document.getElementById("timer");
+    let targetTime = new Date("{{ game.get_ready_time }}");
+
+    {% include 'countdown_function.js' %}
+</script>
 {% endblock %}
