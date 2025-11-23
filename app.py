@@ -85,7 +85,7 @@ class Team:
 def exec_at(dt: datetime, func, *args, **kwargs):
     delay = (dt - datetime.now()).total_seconds()
     if delay < 0:
-        delay = 0
+        delay = 1
     Timer(delay, func, args=args, kwargs=kwargs).start()
 
 
@@ -97,7 +97,7 @@ ready_lead_time = timedelta(minutes=3)
 class Game:
     team_a: Team
     team_b: Team
-    start_time: datetime
+    start_time: datetime = None
     end_time: datetime = None
     team_a_score: int = 0
     team_b_score: int = 0
@@ -133,7 +133,6 @@ class Manager:
         if self.table.active_game is None:
             self.table.active_game = game
             game.start_time = datetime.now() + ready_lead_time
-            game.end_time = game.start_time + game_length
         else:
             print("omg what the hell im literally shaking and crying rn")
             raise Exception("There is already an active game")
@@ -311,7 +310,6 @@ def game_post():
             game = Game(
                 team_a=team_a,
                 team_b=team_b,
-                start_time=datetime.now(),
             )
             manager.schedule_game(game)
             team_a.state = TeamState.MATCHED
@@ -324,7 +322,7 @@ def game_post():
         if both_ready:
             game.team_a.state = TeamState.PLAYING
             game.team_b.state = TeamState.PLAYING
-            request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
+        request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
     if "done" in request.form:
         team.state = TeamState.DONE
         game = manager.table.active_game
@@ -332,7 +330,7 @@ def game_post():
         if both_done:
             game.team_a.state = TeamState.SUBMIT_REQUEST
             game.team_b.state = TeamState.SUBMIT_REQUEST
-            request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
+        request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
     if "submit" in request.form:
         team.state = TeamState.SUBMITTED
         game = manager.table.active_game
@@ -355,11 +353,10 @@ def game_post():
                     flash("Scores do not match, please resubmit")
                     game.team_a.state = TeamState.SUBMIT_REQUEST
                     game.team_b.state = TeamState.SUBMIT_REQUEST
-                    request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
         else:
             game.team_a_score = int(request.form["team_a_score"])
             game.team_b_score = int(request.form["team_b_score"])
-            request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
+        request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
     return redirect(url_for("game_get"))
 
 
