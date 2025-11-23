@@ -89,14 +89,16 @@ def exec_at(dt: datetime, func, *args, **kwargs):
     Timer(delay, func, args=args, kwargs=kwargs).start()
 
 
-game_length = timedelta(minutes=12)
-ready_lead_time = timedelta(minutes=3)
+game_length = timedelta(minutes=10)
+ready_lead_time = timedelta(minutes=4)
+verify_time = timedelta(minutes=1)
 
 
 @dataclass
 class Game:
     team_a: Team
     team_b: Team
+    get_ready_time: datetime = None
     start_time: datetime = None
     end_time: datetime = None
     team_a_score: int = 0
@@ -111,6 +113,7 @@ class Game:
         self.team_b.state = TeamState.READY_REQUEST
         request_refresh({self.team_a.name, self.team_b.name}, ["/game"], redirect="/game")
         # TODO kick the teams if they don't ready up in time
+        # TODO kick when verify time is up
         # TODO end game when time is up
         # TODO add a timer for submission
 
@@ -132,7 +135,7 @@ class Manager:
     def schedule_game(self, game: Game):
         if self.table.active_game is None:
             self.table.active_game = game
-            game.start_time = datetime.now() + ready_lead_time
+            game.get_ready_time = datetime.now()
         else:
             print("omg what the hell im literally shaking and crying rn")
             raise Exception("There is already an active game")
@@ -336,23 +339,23 @@ def game_post():
         game = manager.table.active_game
         both_submitted = game.team_a.state == TeamState.SUBMITTED and game.team_b.state == TeamState.SUBMITTED
         if both_submitted:
-            if team.name == game.team_a.name:
-                sa = int(request.form["team_a_score"])
-                sb = int(request.form["team_b_score"])
-                if sa == game.team_a_score and sb == game.team_b_score:
-                    game.end_time = datetime.now()
-                    game.team_a.state = TeamState.INACTIVE
-                    game.team_b.state = TeamState.INACTIVE
-                    manager.past_games.append(game)
-                    manager.table.active_game = None
-                    request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
-                    request_refresh([None], ["/leaderboard"], redirect=None)
-                    # TODO win page
-                    update_elo(game)
-                else:
-                    flash("Scores do not match, please resubmit")
-                    game.team_a.state = TeamState.SUBMIT_REQUEST
-                    game.team_b.state = TeamState.SUBMIT_REQUEST
+            sa = int(request.form["team_a_score"])
+            sb = int(request.form["team_b_score"])
+            if sa == game.team_a_score and sb == game.team_b_score:
+                game.end_time = datetime.now()
+                game.team_a.state = TeamState.INACTIVE
+                game.team_b.state = TeamState.INACTIVE
+                manager.past_games.append(game)
+                manager.table.active_game = None
+                request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
+                request_refresh([None], ["/leaderboard"], redirect=None)
+                # TODO win page
+                update_elo(game)
+            else:
+                flash("Scores do not match, please resubmit")
+                game.team_a.state = TeamState.SUBMIT_REQUEST
+                game.team_b.state = TeamState.SUBMIT_REQUEST
+
         else:
             game.team_a_score = int(request.form["team_a_score"])
             game.team_b_score = int(request.form["team_b_score"])
