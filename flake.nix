@@ -79,7 +79,7 @@
         packages = {
           default = bir3;
           dockerImage = pkgs.dockerTools.streamLayeredImage {
-            name = "bir3";
+            name = "3bir";
             tag = "latest";
             contents = [ bir3 ];
             config = {
