@@ -351,11 +351,11 @@ def game_post():
                 flash("Scores do not match, please resubmit")
                 game.team_a.state = TeamState.SUBMIT_REQUEST
                 game.team_b.state = TeamState.SUBMIT_REQUEST
-
+                request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
         else:
             game.team_a_score = int(request.form["team_a_score"])
             game.team_b_score = int(request.form["team_b_score"])
-        request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
+            # request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
     return redirect(url_for("game_get"))
 
 
