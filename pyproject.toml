@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Beer Pong Matchmaking and Tournament App"
 dependencies = [
     "flask",
+    "flask-socketio",
     "waitress"
 ]
 
