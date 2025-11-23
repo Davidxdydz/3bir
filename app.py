@@ -72,6 +72,8 @@ class Game:
     state: GameState
     start_time: datetime
     end_time: datetime = None
+    team_a_score: int = 0
+    team_b_score: int = 0
 
 
 @dataclass
@@ -238,6 +240,42 @@ def game_post():
             team_a.state = TeamState.MATCHED
             team_b.state = TeamState.MATCHED
             request_refresh({team_a.name, team_b.name}, ["game"], redirect=None)
+    if "ready" in request.form:
+        team.state = TeamState.READY
+        game = manager.table.active_game
+        both_ready = game.team_a.state == TeamState.READY and game.team_b.state == TeamState.READY
+        if both_ready:
+            game.state = GameState.WAIT_DONE
+            game.team_a.state = TeamState.PLAYING
+            game.team_b.state = TeamState.PLAYING
+            request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect=None)
+    if "submit" in request.form:
+        team.state = TeamState.SUBMITTED
+        game = manager.table.active_game
+        both_submitted = game.team_a.state == TeamState.SUBMITTED and game.team_b.state == TeamState.SUBMITTED
+        if both_submitted:
+            if team.name == game.team_a.name:
+                sa = int(request.form["team_a_score"])
+                sb = int(request.form["team_b_score"])
+                if sa == game.team_a_score and sb == game.team_b_score:
+                    game.state = GameState.COMPLETED
+                    game.end_time = datetime.now()
+                    game.team_a.state = TeamState.INACTIVE
+                    game.team_b.state = TeamState.INACTIVE
+                    manager.past_games.append(game)
+                    manager.table.active_game = None
+                    request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect=None)
+                    request_refresh(None, ["leaderboard"], redirect=None)
+                    # TODO win page, elo updates
+                else:
+                    flash("Scores do not match, please resubmit")
+                    game.team_a.state = TeamState.SUBMIT_REQUEST
+                    game.team_b.state = TeamState.SUBMIT_REQUEST
+                    request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect="/game")
+        else:
+            game.team_a_score = int(request.form["team_a_score"])
+            game.team_b_score = int(request.form["team_b_score"])
+            request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect=None)
 
 
 @app.get("/team/<string:team_name>")
