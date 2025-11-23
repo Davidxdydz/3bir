@@ -437,11 +437,11 @@ def result_get():
         winner = None
         loser = None
     if winner is None:
-        return render_template("draw.html", game=latest_game)
+        return render_template("draw.html", game=latest_game, team=manager.teams[team_name])
     if team_name == winner:
-        return render_template("win.html", game=latest_game)
+        return render_template("win.html", game=latest_game, team=manager.teams[team_name])
     else:
-        return render_template("lose.html", game=latest_game)
+        return render_template("lose.html", game=latest_game, team=manager.teams[team_name])
 
 
 if __name__ == "__main__":
