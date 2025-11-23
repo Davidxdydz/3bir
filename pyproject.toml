@@ -1,0 +1,17 @@
+[project]
+name = "threebir"
+version = "0.1.0"
+description = "Beer Pong Matchmaking and Tournament App"
+dependencies = [
+    "flask",
+    "waitress"
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# This is crucial: it tells pip/nix to treat 'app.py' as a python module
+# so Waitress can import it.
+[tool.setuptools]
+py-modules = ["app"]
