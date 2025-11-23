@@ -46,6 +46,7 @@ class TeamState(Enum):
     READY_REQUEST = "ready_request"
     READY = "ready"
     PLAYING = "playing"
+    DONE = "done"
     SUBMIT_REQUEST = "submit_request"
     SUBMITTED = "submitted"
 
@@ -54,8 +55,13 @@ class TeamState(Enum):
 class Team:
     name: str
     password: str
-    state: TeamState
-    elo: int
+    state: TeamState = TeamState.INACTIVE
+    elo: int = 1000
+    wins: int = 0
+    losses: int = 0
+    draws: int = 0
+    match_history: list = field(default_factory=list)
+    elo_history: list = field(default_factory=lambda: [1000])
 
 
 class GameState(Enum):
@@ -161,7 +167,7 @@ def login_post():
         if error is not None:
             flash(error)
             return redirect(url_for("login_get"))
-        new_team = Team(name=username, password=password, state=TeamState.INACTIVE, elo=1000)
+        new_team = Team(name=username, password=password)
         manager.teams[new_team.name] = new_team
         session["team"] = new_team.name
     elif "login" in request.form:
@@ -209,11 +215,42 @@ def game_get():
 
     team = manager.teams.get(team_name)
     template = gamestate_map.get(team.state)
-    if team.state in (TeamState.MATCHED, TeamState.READY_REQUEST, TeamState.READY, TeamState.PLAYING, TeamState.SUBMIT_REQUEST, TeamState.SUBMITTED):
+    if team.state in (TeamState.MATCHED, TeamState.READY_REQUEST, TeamState.READY, TeamState.PLAYING, TeamState.DONE, TeamState.SUBMIT_REQUEST, TeamState.SUBMITTED):
         game = manager.table.active_game
         if game and (game.team_a == team or game.team_b == team):
             return render_template(template, team=team, game=game)
     return render_template(template, team=team)
+
+
+def update_elo(game: Game):
+    a = game.team_a
+    b = game.team_b
+    sa = game.team_a_score
+    sb = game.team_b_score
+    if sa > sb:
+        a.wins += 1
+        b.losses += 1
+        result_a = 1.0
+    elif sa < sb:
+        a.losses += 1
+        b.wins += 1
+        result_a = 0.0
+    else:
+        a.draws += 1
+        b.draws += 1
+        result_a = 0.5
+    result_b = 1.0 - result_a
+    qa = 10 ** (a.elo / 400)
+    qb = 10 ** (b.elo / 400)
+    ea = qa / (qa + qb)
+    eb = qb / (qa + qb)
+    k = 32
+    a.elo += int(k * (result_a - ea))
+    b.elo += int(k * (result_b - eb))
+    a.elo_history.append(a.elo)
+    b.elo_history.append(b.elo)
+    a.match_history.append(game)
+    b.match_history.append(game)
 
 
 @app.post("/game")
@@ -239,7 +276,7 @@ def game_post():
             manager.schedule_game(game)
             team_a.state = TeamState.MATCHED
             team_b.state = TeamState.MATCHED
-            request_refresh({team_a.name, team_b.name}, ["game"], redirect=None)
+            request_refresh({team_a.name, team_b.name}, ["game"], redirect="/game")
     if "ready" in request.form:
         team.state = TeamState.READY
         game = manager.table.active_game
@@ -248,7 +285,16 @@ def game_post():
             game.state = GameState.WAIT_DONE
             game.team_a.state = TeamState.PLAYING
             game.team_b.state = TeamState.PLAYING
-            request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect=None)
+            request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect="/game")
+    if "done" in request.form:
+        team.state = TeamState.DONE
+        game = manager.table.active_game
+        both_done = game.team_a.state == TeamState.DONE and game.team_b.state == TeamState.DONE
+        if both_done:
+            game.state = GameState.WAIT_SUBMIT
+            game.team_a.state = TeamState.SUBMIT_REQUEST
+            game.team_b.state = TeamState.SUBMIT_REQUEST
+            request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect="/game")
     if "submit" in request.form:
         team.state = TeamState.SUBMITTED
         game = manager.table.active_game
@@ -267,6 +313,7 @@ def game_post():
                     request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect=None)
                     request_refresh(None, ["leaderboard"], redirect=None)
                     # TODO win page, elo updates
+                    update_elo(game)
                 else:
                     flash("Scores do not match, please resubmit")
                     game.team_a.state = TeamState.SUBMIT_REQUEST
