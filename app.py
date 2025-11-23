@@ -86,7 +86,7 @@ class Team:
 def exec_at(dt: datetime, func, *args, **kwargs):
     delay = (dt - datetime.now()).total_seconds()
     if delay < 0:
-        delay = 1
+        delay = 0
     Timer(delay, func, args=args, kwargs=kwargs).start()
 
 
@@ -166,9 +166,9 @@ class Manager:
                 team_a=team_a,
                 team_b=team_b,
             )
-            self.schedule_game(game)
             team_a.state = TeamState.MATCHED
             team_b.state = TeamState.MATCHED
+            self.schedule_game(game)
             request_refresh({team_a.name, team_b.name}, ["/game"], redirect="/game")
 
     def set_team_ready(self, team_name: str):
