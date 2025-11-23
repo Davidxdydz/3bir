@@ -56,6 +56,7 @@ class Team:
     name: str
     password: str
     state: TeamState = TeamState.INACTIVE
+    about: str = ""
     elo: int = 1000
     wins: int = 0
     losses: int = 0
@@ -64,18 +65,10 @@ class Team:
     elo_history: list = field(default_factory=lambda: [1000])
 
 
-class GameState(Enum):
-    WAIT_READY = "wait_ready"
-    WAIT_DONE = "wait_done"
-    WAIT_SUBMIT = "wait_submit"
-    COMPLETED = "completed"
-
-
 @dataclass
 class Game:
     team_a: Team
     team_b: Team
-    state: GameState
     start_time: datetime
     end_time: datetime = None
     team_a_score: int = 0
@@ -270,7 +263,6 @@ def game_post():
             game = Game(
                 team_a=team_a,
                 team_b=team_b,
-                state=GameState.WAIT_READY,
                 start_time=datetime.now(),
             )
             manager.schedule_game(game)
@@ -282,7 +274,6 @@ def game_post():
         game = manager.table.active_game
         both_ready = game.team_a.state == TeamState.READY and game.team_b.state == TeamState.READY
         if both_ready:
-            game.state = GameState.WAIT_DONE
             game.team_a.state = TeamState.PLAYING
             game.team_b.state = TeamState.PLAYING
             request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect="/game")
@@ -291,7 +282,6 @@ def game_post():
         game = manager.table.active_game
         both_done = game.team_a.state == TeamState.DONE and game.team_b.state == TeamState.DONE
         if both_done:
-            game.state = GameState.WAIT_SUBMIT
             game.team_a.state = TeamState.SUBMIT_REQUEST
             game.team_b.state = TeamState.SUBMIT_REQUEST
             request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect="/game")
@@ -304,7 +294,6 @@ def game_post():
                 sa = int(request.form["team_a_score"])
                 sb = int(request.form["team_b_score"])
                 if sa == game.team_a_score and sb == game.team_b_score:
-                    game.state = GameState.COMPLETED
                     game.end_time = datetime.now()
                     game.team_a.state = TeamState.INACTIVE
                     game.team_b.state = TeamState.INACTIVE
@@ -334,6 +323,20 @@ def team_get(team_name: str):
     team = manager.teams.get(team_name)
     editable = self_team_name == team_name
     return render_template("team.html", team=team, editable=editable)
+
+
+@app.post("/team/<string:team_name>")
+def team_post(team_name: str):
+    self_team_name = session.get("team")
+    if team_name != self_team_name:
+        flash("You can only edit your own team")
+        return redirect(url_for("team_get", team_name=team_name))
+    team = manager.teams.get(team_name)
+    if "about" in request.form:
+        team.about = request.form["about"]
+        request_refresh({team_name}, ["team/" + team_name], redirect=None)
+        request_refresh(None, ["team/" + team_name], redirect=None)
+    return redirect(url_for("team_get", team_name=team_name))
 
 
 @app.get("/schedule")
