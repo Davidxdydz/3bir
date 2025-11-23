@@ -2,4 +2,20 @@
 
 
 {% block content %}
+<div class="game-container">
+    <p>{{ game.team_a.name }} goes first</p>
+    <p>please set up the table</p>
+    <h3>Rules</h3>
+    <ul>
+        <li>PLACEHOLDER</li>
+        <li>PLACEHOLDER</li>
+        <li>PLACEHOLDER</li>
+    </ul>
+    <p>[[TIMER: PLACEHOLDER]]</p>
+
+
+    <form method="POST" action="/game">
+        <button type="submit" name="ready" class="btn-ready">We are ready!</button>
+    </form>
+</div>
 {% endblock %}
