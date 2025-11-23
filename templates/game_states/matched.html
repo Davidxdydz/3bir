@@ -2,4 +2,11 @@
 
 
 {% block content %}
+<div class="game-container">
+    <h2> Match found!</h2>
+    <p>{{ game.team_a.name }} against {{ game.team_b.name }}</p>
+    <p>scheduled for {{ game.start_time }}</p>
+    <p>remaining time :[[TODO]] minutes </p>
+
+</div>
 {% endblock %}
