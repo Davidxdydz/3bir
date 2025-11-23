@@ -104,6 +104,14 @@ class Game:
     team_a_score: int = 0
     team_b_score: int = 0
 
+    @property
+    def expected_start_time(self):
+        return self.get_ready_time + ready_lead_time
+
+    @property
+    def expected_end_time(self):
+        return self.expected_start_time + game_length
+
     def get_ready(self):
         self.team_a.state = TeamState.READY_REQUEST
         self.team_b.state = TeamState.READY_REQUEST
