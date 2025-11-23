@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+{% set a = game.team_a.name %}
+{% set b = game.team_b.name %}
+
+<div class="page-shell">
+    <section class="panel relative overflow-hidden text-center">
+        <div class="pointer-events-none absolute inset-0">
+            <div
+                class="absolute inset-x-0 top-0 mx-auto h-40 w-40 rounded-full bg-gradient-to-r from-cyan-400/40 to-violet-500/40 blur-3xl animate-[spin_24s_linear_infinite]">
+            </div>
+            <div
+                class="absolute left-6 bottom-0 h-32 w-32 rounded-full bg-gradient-to-r from-white/20 to-transparent blur-3xl animate-pulse">
+            </div>
+        </div>
+
+        <div class="relative space-y-6">
+            <div class="flex flex-col items-center gap-2">
+                <span class="pill text-cyan-200/80">Dead even</span>
+                <h1 class="page-heading">{{ a }} ties {{ b }}</h1>
+                <p class="text-base text-slate-300">Damn, that's annoying. What's next?</p>
+            </div>
+
+            <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                <a href="{{ url_for('game_get') }}" class="primary-btn w-full justify-center sm:w-auto">New match</a>
+                <a href="{{ url_for('leaderboard_get') }}" class="secondary-btn w-full justify-center sm:w-auto">Check
+                    leaderboard</a>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

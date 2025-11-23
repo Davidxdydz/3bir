@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+{% set is_team_a = game.team_a.name == team.name %}
+{% set opponent = game.team_b.name if is_team_a else game.team_a.name %}
+{% set team_score = game.team_a_score if is_team_a else game.team_b_score %}
+{% set opponent_score = game.team_b_score if is_team_a else game.team_a_score %}
+{% set diff = (team_score - opponent_score)|abs %}
+
+<div class="page-shell">
+    <section class="panel relative overflow-hidden text-center">
+        <div class="pointer-events-none absolute inset-0">
+            <div
+                class="absolute -right-32 top-0 h-72 w-72 rounded-full bg-gradient-to-br from-rose-500/40 to-orange-500/30 blur-[120px] animate-[spin_22s_linear_infinite]">
+            </div>
+            <div
+                class="absolute -left-10 bottom-0 h-48 w-48 rounded-full bg-gradient-to-br from-white/20 to-transparent blur-3xl animate-pulse">
+            </div>
+        </div>
+
+        <div class="relative space-y-6">
+            <div class="flex flex-col items-center gap-2">
+                <h1 class="page-heading">You lost</h1>
+                <span class="pill">by {{ diff }} cups</span>
+                <p class="text-base text-slate-300"> Log it and get back in line.</p>
+            </div>
+
+            <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                <a href="{{ url_for('game_get') }}" class="primary-btn w-full justify-center sm:w-auto">Request
+                    new match</a>
+                <a href="{{ url_for('schedule_get') }}" class="secondary-btn w-full justify-center sm:w-auto">Check
+                    schedule</a>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

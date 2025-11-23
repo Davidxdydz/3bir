@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+{% set is_team_a = game.team_a.name == team.name %}
+{% set opponent = game.team_b.name if is_team_a else game.team_a.name %}
+{% set team_score = game.team_a_score if is_team_a else game.team_b_score %}
+{% set opponent_score = game.team_b_score if is_team_a else game.team_a_score %}
+{% set diff = team_score - opponent_score %}
+
+<div class="page-shell">
+    <section class="panel relative overflow-hidden text-center">
+        <div class="pointer-events-none absolute inset-0">
+            <div
+                class="absolute -left-10 top-0 h-48 w-48 rounded-full bg-gradient-to-r from-emerald-400/60 to-brand-400/40 blur-3xl animate-[spin_18s_linear_infinite]">
+            </div>
+            <div
+                class="absolute right-0 top-1/2 h-56 w-56 rounded-full bg-gradient-to-r from-brand-500/40 to-purple-500/30 blur-3xl animate-[pulse_6s_ease-in-out_infinite]">
+            </div>
+        </div>
+
+        <div class="relative space-y-6">
+            <div class="flex flex-col items-center gap-2">
+                <span class="pill text-emerald-200/90">Victory secured</span>
+                <h1 class="page-heading">You won by {{ diff }} cups!</h1>
+                <p class="text-base text-slate-300">Queue the next game or check your updated ranking.</p>
+            </div>
+
+            <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
+                <a href="{{ url_for('game_get') }}" class="secondary-btn w-full justify-center sm:w-auto">Request next
+                    match</a>
+                <a href="{{ url_for('leaderboard_get') }}" class="primary-btn w-full justify-center sm:w-auto">View
+                    leaderboard</a>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}
