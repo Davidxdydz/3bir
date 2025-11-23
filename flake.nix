@@ -16,18 +16,6 @@
       system:
       let
         pkgs = import nixpkgs { inherit system; };
-        threebir = pkgs.python312Packages.buildPythonPackage {
-          pname = "threebir";
-          version = "0.1.0";
-          pyproject = true;
-          src = ./.;
-          build-system = with pkgs.python312Packages; [ setuptools ];
-          dependencies = with pkgs.python312Packages; [
-            flask
-            flask-socketio
-            waitress
-          ];
-        };
         myApp = pkgs.python312Packages.buildPythonApplication {
           pname = "flask-nix-server";
           version = "0.1.0";
@@ -55,12 +43,12 @@
           postInstall = ''
             # Ensure site-packages exists (it should, but good practice)
             mkdir -p $out/lib/${pkgs.python312Packages.python.libPrefix}/site-packages
-            
+
             # Copy templates directory if it exists
             if [ -d templates ]; then
               cp -r templates $out/lib/${pkgs.python312Packages.python.libPrefix}/site-packages/
             fi
-            
+
             # Copy static directory if it exists
             if [ -d static ]; then
               cp -r static $out/lib/${pkgs.python312Packages.python.libPrefix}/site-packages/
@@ -81,15 +69,17 @@
                 flask-socketio
                 build
                 waitress
-                threebir
               ]
             ))
-            threebir
             pyright
             myApp
           ];
         };
         packages.default = myApp;
+        apps.default = {
+          type = "app";
+          program = "${myApp}/bin/start-server";
+        };
       }
     );
 }
