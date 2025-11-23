@@ -410,5 +410,39 @@ def leaderboard_get():
     return render_template("leaderboard.html", teams=teams)
 
 
+def get_latest_game(team: Team):
+    for game in reversed(manager.past_games):
+        if game.team_a == team or game.team_b == team:
+            return game
+    return None
+
+
+@app.get("/result")
+def result_get():
+    team_name = session.get("team")
+    if team_name is None:
+        flash("You must be logged in to view results")
+        return redirect(url_for("login_get"))
+    latest_game = get_latest_game(manager.teams[team_name])
+    if latest_game is None:
+        flash("You have no completed games")
+        return redirect(url_for("game_get"))
+    if latest_game.team_a_score > latest_game.team_b_score:
+        winner = latest_game.team_a.name
+        loser = latest_game.team_b.name
+    elif latest_game.team_a_score < latest_game.team_b_score:
+        winner = latest_game.team_b.name
+        loser = latest_game.team_a.name
+    else:
+        winner = None
+        loser = None
+    if winner is None:
+        return render_template("draw.html", game=latest_game)
+    if team_name == winner:
+        return render_template("win.html", game=latest_game)
+    else:
+        return render_template("lose.html", game=latest_game)
+
+
 if __name__ == "__main__":
     socketio.run(app, debug=True)
