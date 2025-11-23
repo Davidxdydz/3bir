@@ -53,8 +53,20 @@
           # 3. We wrap it to execute waitress-serve with specific arguments.
           # 4. We add the current folder to PYTHONPATH so waitress can find 'app.py'
           postInstall = ''
+            # Ensure site-packages exists (it should, but good practice)
+            mkdir -p $out/lib/${pkgs.python312Packages.python.libPrefix}/site-packages
+            
+            # Copy templates directory if it exists
+            if [ -d templates ]; then
+              cp -r templates $out/lib/${pkgs.python312Packages.python.libPrefix}/site-packages/
+            fi
+            
+            # Copy static directory if it exists
+            if [ -d static ]; then
+              cp -r static $out/lib/${pkgs.python312Packages.python.libPrefix}/site-packages/
+            fi
             makeWrapper ${pkgs.python312Packages.waitress}/bin/waitress-serve $out/bin/start-server \
-                --prefix PYTHONPATH : "$out/lib/${pkgs.python312.libPrefix}/site-packages" \
+                --prefix PYTHONPATH : "$out/lib/${pkgs.python312Packages.python.libPrefix}/site-packages" \
                 --add-flags "--port=8080" \
                 --add-flags "app:app"
           '';
