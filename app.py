@@ -110,7 +110,8 @@ class Manager:
     connections: dict[str, list[str]] = field(default_factory=dict)  # team name -> [connection id]
     searching_teams: set[str] = field(default_factory=set)
 
-    def schedule_game(self, game: Game): ...
+    def schedule_game(self, game: Game):
+        self.table.active_game = game
 
 
 app = Flask(__name__)
