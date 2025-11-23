@@ -104,10 +104,6 @@ class Game:
     team_a_score: int = 0
     team_b_score: int = 0
 
-    @property
-    def get_ready_time(self) -> datetime:
-        return self.start_time - timedelta(minutes=3)
-
     def get_ready(self):
         self.team_a.state = TeamState.READY_REQUEST
         self.team_b.state = TeamState.READY_REQUEST
