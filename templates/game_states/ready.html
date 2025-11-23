@@ -2,20 +2,15 @@
 
 
 {% block content %}
-<div class="game-container">
-    <p>{{ game.team_a.name }} goes first</p>
-    <p>waiting for the other team to be ready</p>
-    <h3>Rules</h3>
-    <ul>
-        <li>PLACEHOLDER</li>
-        <li>PLACEHOLDER</li>
-        <li>PLACEHOLDER</li>
-    </ul>
-    <p>setup time is up [[TIMER: PLACEHOLDER]]</p>
-
-
-    <form method="POST" action="/game">
-        <button type="submit" name="ready" class="btn-ready" disabled>We are ready!</button>
-    </form>
+<div class="mx-auto max-w-3xl">
+    <div class="panel text-center">
+        <p class="section-subtitle">Locked in</p>
+        <h1 class="page-heading">Waiting on opponent</h1>
+        <p class="text-base text-slate-300">You’re marked as ready. The match will start when both teams confirm.</p>
+        <div class="info-banner">{{ game.team_a.name }} serves first. The timer begins once both teams are ready.
+        </div>
+        <button type="button" disabled class="secondary-btn w-full justify-center py-3 text-base text-white/60">Ready
+            confirmed</button>
+    </div>
 </div>
 {% endblock %}

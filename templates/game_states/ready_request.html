@@ -2,20 +2,24 @@
 
 
 {% block content %}
-<div class="game-container">
-    <p>{{ game.team_a.name }} goes first</p>
-    <p>please set up the table</p>
-    <h3>Rules</h3>
-    <ul>
-        <li>PLACEHOLDER</li>
-        <li>PLACEHOLDER</li>
-        <li>PLACEHOLDER</li>
-    </ul>
-    <p>remaining setup time:[[TIMER: PLACEHOLDER]]</p>
-
-
-    <form method="POST" action="/game">
-        <button type="submit" name="ready" class="btn-ready">We are ready!</button>
-    </form>
+<div class="mx-auto max-w-3xl">
+    <div class="panel">
+        <p class="section-subtitle">Ready check</p>
+        <h1 class="page-heading">{{ game.team_a.name }} serves first</h1>
+        <p class="text-base text-slate-300">Set up the table, verify cups, and ensure balls are clean. Let us know once
+            you’re staged—the timer won’t start until both teams confirm.</p>
+        <ul class="space-y-3 text-sm text-white/80">
+            <li class="flex items-start gap-3"><span class="mt-1 h-2 w-2 rounded-full bg-brand-400"></span>Table
+                cleared and leveled</li>
+            <li class="flex items-start gap-3"><span class="mt-1 h-2 w-2 rounded-full bg-brand-400"></span>Lighting and
+                cameras positioned</li>
+            <li class="flex items-start gap-3"><span class="mt-1 h-2 w-2 rounded-full bg-brand-400"></span>Score sheet
+                visible to both teams</li>
+        </ul>
+        <form method="POST" action="{{ url_for('game_post') }}" class="pt-2">
+            <button type="submit" name="ready" class="primary-btn w-full justify-center py-3 text-base">We’re
+                ready</button>
+        </form>
+    </div>
 </div>
 {% endblock %}

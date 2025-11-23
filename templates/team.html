@@ -2,23 +2,73 @@
 
 
 {% block content %}
-<div class="team-container">
-    <h2>Team: {{ team.name }}</h2>
-    <p>ELO: {{ team.elo }}</p>
-    <p>Status: {{ team.state }}</p>
-</div>
-{% if editable %}
-<p>About this team</p>
-{% endif %}
+<div class="page-shell">
+    <section class="panel">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <p class="section-subtitle">Team overview</p>
+                <h1 class="page-heading">{{ team.name }}</h1>
+                <p class="muted">Currently {{ team.state.value.replace('_', ' ') if team.state else 'inactive' }}</p>
+            </div>
+            <div class="flex flex-wrap gap-4">
+                <div class="stat-chip">
+                    <span class="text-xs uppercase tracking-[0.3em] text-white/60">ELO</span>
+                    <span class="text-4xl font-display text-brand-200">{{ team.elo }}</span>
+                    <span class="text-slate-400">current rating</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="text-xs uppercase tracking-[0.3em] text-white/60">Record</span>
+                    <span class="text-3xl font-semibold">{{ team.wins }}-{{ team.losses }}-{{ team.draws }}</span>
+                    <span class="text-slate-400">W / L / D</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<div class="team.about">
-    <h3>{{team.about}}</h3>
-    <!-- gives an error message that I can only edit my own team -->
-    {% if editable %}
-    <form method="POST" action="/team/{{ team.name }}">
-        <input type="text" name="about" id="about" placeholder="About this team" value="{{ team.about }}" />
-        <button type="submit">Update</button>
-    </form>
-    {% endif %}
+    <div class="grid gap-8 lg:grid-cols-3">
+        <section class="panel lg:col-span-2">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="section-subtitle">About</p>
+                    <h2 class="text-2xl font-semibold text-white">Details</h2>
+                </div>
+                {% if editable %}
+                <span class="pill">editable</span>
+                {% endif %}
+            </div>
+            <p class="text-base text-slate-200">{{ team.about or "No description yet." }}</p>
+
+            {% if editable %}
+            <form method="POST" action="{{ url_for('team_post', team_name=team.name) }}" class="space-y-3">
+                <label class="form-label" for="about">Update description</label>
+                <textarea name="about" id="about" rows="4" class="form-textarea"
+                    placeholder="Add notes about strategy, roster, or goals">{{ team.about }}</textarea>
+                <button type="submit" class="primary-btn">Save changes</button>
+            </form>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="section-subtitle">Recent games</p>
+                    <h2 class="text-xl font-semibold text-white">Match history</h2>
+                </div>
+            </div>
+            {% if team.match_history %}
+            <ul class="space-y-4">
+                {% for game in team.match_history|reverse %}
+                {% if loop.index0 < 5 %} <li class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <p class="text-sm text-white/70">{{ game.team_a.name }} vs {{ game.team_b.name }}</p>
+                    <p class="text-lg font-semibold text-white">{{ game.team_a_score }} - {{ game.team_b_score }}</p>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-sm text-slate-400">No recorded games yet.</p>
+            {% endif %}
+        </section>
+    </div>
 </div>
 {% endblock %}

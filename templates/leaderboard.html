@@ -1,29 +1,82 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="leaderboard-container">
-    <h2>Leaderboard</h2>
-    {% if teams %}
-    <table class="leaderboard-table">
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Team</th>
-                <th>ELO</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for team in teams %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ team.name }}</td>
-                <td>{{ team.elo }}</td>
-            </tr>
+{% set top_three = teams[:3] %}
+{% set rest = teams[3:] %}
+
+<div class="page-shell">
+    <section class="panel">
+        <div class="section-split">
+            <div class="space-y-2">
+                <p class="section-subtitle">Live standings</p>
+                <h1 class="page-heading">Leaderboard</h1>
+            </div>
+            <div class="grid flex-1 gap-4 sm:grid-cols-2">
+                <div class="stat-chip">
+                    <span class="text-xs uppercase tracking-[0.3em] text-white/60">Registered</span>
+                    <span class="text-3xl font-semibold">{{ teams|length }}</span>
+                    <span class="text-slate-400">teams</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="text-xs uppercase tracking-[0.3em] text-white/60">Highest ELO</span>
+                    <span class="text-3xl font-semibold">{{ teams[0].elo if teams else '—' }}</span>
+                    <span class="text-slate-400">{{ teams[0].name if teams else '' }}</span>
+                </div>
+            </div>
+        </div>
+
+        {% if teams %}
+        <div class="grid gap-4 md:grid-cols-3">
+            {% for team in top_three %}
+            <div class="rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-5 shadow-card">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm uppercase tracking-[0.3em] text-white/60">#{{ loop.index }}</p>
+                    <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">Top {{
+                        loop.index }}</span>
+                </div>
+                <p class="mt-4 text-xl font-semibold text-white">{{ team.name }}</p>
+                <p class="text-4xl font-display text-brand-200">{{ team.elo }}</p>
+                <p class="text-sm text-slate-400">Current placement</p>
+            </div>
             {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>No teams available.</p>
-    {% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="panel space-y-0 overflow-hidden p-0">
+        <div class="flex items-center justify-between px-6 py-4">
+            <div>
+                <p class="section-subtitle">Full table</p>
+                <h2 class="text-2xl font-semibold text-white">Latest rankings</h2>
+            </div>
+            <span class="pill">live update</span>
+        </div>
+        <div class="table-scroll">
+            <table class="min-w-full divide-y divide-white/5 text-left">
+                <thead class="bg-white/5 text-xs uppercase tracking-[0.3em] text-white/60">
+                    <tr>
+                        <th class="px-6 py-3">Rank</th>
+                        <th class="px-6 py-3">Team</th>
+                        <th class="px-6 py-3">ELO</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5 text-sm">
+                    {% if teams %}
+                    {% for team in teams %}
+                    <tr class="transition hover:bg-white/5">
+                        <td class="px-6 py-4 font-mono text-white/70">#{{ loop.index }}</td>
+                        <td class="px-6 py-4 font-semibold text-white">{{ team.name }}</td>
+                        <td class="px-6 py-4 font-mono text-brand-200">{{ team.elo }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="px-6 py-6 text-center text-slate-400">No teams registered yet.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </section>
 </div>
 {% endblock %}

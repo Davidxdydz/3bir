@@ -2,7 +2,13 @@
 
 
 {% block content %}
-<div class="game-container">
-    <p>You are not logged in. Please <a href="/login">login</a> to join a game.</p>
+<div class="mx-auto max-w-3xl">
+    <div class="panel text-center">
+        <p class="section-subtitle">Access restricted</p>
+        <h1 class="page-heading">Please log in</h1>
+        <p class="text-base text-slate-300">You need an active team session to view game status. Sign in or register to
+            jump into the queue.</p>
+        <a href="{{ url_for('login_get') }}" class="primary-btn w-full justify-center py-3 text-base">Go to login</a>
+    </div>
 </div>
 {% endblock %}

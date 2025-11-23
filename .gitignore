@@ -3,3 +3,13 @@
 __pycache__/
 dist/
 *.egg-info/
+node_modules/
+.venv/
+.env
+.DS_Store
+package-lock.json
+.vscode/
+.idea/
+*.log
+npm-debug.log*
+static/css/main.css.map

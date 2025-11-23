@@ -2,16 +2,18 @@
 
 
 {% block content %}
-<div class="game-container">
-    <h2>No active game</h2>
-    <p>You are currently not in a game.</p>
-    <form method="POST" action="/game">
-        <button type="submit" class="btn-search" disabled>Searching for opponent...</button>
-    </form>
-    <!-- todo spinner -->
-    <!-- <div class="spinner-container">
-        <div class="spinner"></div>
-        <p>Searching for opponent...</p>
-    </div> -->
+<div class="mx-auto max-w-3xl">
+    <div class="panel text-center space-y-8">
+        <p class="section-subtitle">Matchmaking</p>
+        <h1 class="page-heading">Searching for opponent</h1>
+        <p class="text-base text-slate-300">Hang tight while we find the perfect matchup. Keep this tab open—refreshes
+            happen automatically.</p>
+        <div class="flex items-center justify-center gap-3">
+            <span class="inline-flex h-3 w-3 animate-ping rounded-full bg-brand-400"></span>
+            <span class="text-sm uppercase tracking-[0.3em] text-white/60">Live queue</span>
+        </div>
+        <button type="button" disabled
+            class="secondary-btn w-full justify-center py-3 text-base text-white/60">Searching...</button>
+    </div>
 </div>
 {% endblock %}

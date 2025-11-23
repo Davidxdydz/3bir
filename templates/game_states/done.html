@@ -3,14 +3,24 @@
 
 {% block content %}
 
-<div class="game-container">
-    <h2> Team {{ game.team_a.name }} against team {{ game.team_b.name }}</h2>
-    <p>remaining gaming time: [[TIMER: PLACEHOLDER]]</p>
-
-    <form method="POST" action="/game">
-        <button type="submit" name="done" class="btn-done" disabled>Game is over...</button>
-    </form>
-
+<div class="mx-auto max-w-4xl">
+    <div class="panel">
+        <p class="section-subtitle">Wrap up</p>
+        <h1 class="page-heading">{{ game.team_a.name }} vs {{ game.team_b.name }}</h1>
+        <p class="text-base text-slate-300">Waiting for both captains to confirm the match is complete.</p>
+        <div class="grid gap-6 md:grid-cols-2">
+            <div class="score-card">
+                <p class="score-label">{{ game.team_a.name }}</p>
+                <p class="score-value">{{ game.team_a_score }}</p>
+            </div>
+            <div class="score-card">
+                <p class="score-label">{{ game.team_b.name }}</p>
+                <p class="score-value">{{ game.team_b_score }}</p>
+            </div>
+        </div>
+        <button type="button" disabled class="secondary-btn w-full justify-center py-3 text-base text-white/60">Waiting
+            for opponent...</button>
+    </div>
 </div>
 
 {% endblock %}

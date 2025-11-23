@@ -4,44 +4,92 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ title }}</title>
+    <title>{{ title or "Hackapong Control Room" }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 
-<body>
+<body class="min-h-screen bg-slate-950 font-body text-slate-100 antialiased">
+    <div class="relative min-h-screen">
+        <div class="pointer-events-none absolute inset-0">
+            <div class="absolute -left-20 top-8 h-72 w-72 rounded-full bg-brand-500/30 blur-3xl"></div>
+            <div class="absolute inset-x-0 top-1/3 mx-auto h-96 w-96 rounded-full bg-purple-600/20 blur-[140px]"></div>
+            <div class="absolute -right-10 bottom-0 h-80 w-80 rounded-full bg-blue-500/20 blur-3xl"></div>
+        </div>
 
+        <div class="relative z-10 flex min-h-screen flex-col">
+            <header class="header-shell">
+                <div class="header-container">
+                    <div class="header-inner">
+                        <div class="flex flex-col gap-1">
+                            <p class="text-xs uppercase tracking-[0.3em] text-brand-200">Hackapong</p>
+                            <a href="{{ url_for('leaderboard_get') }}"
+                                class="text-2xl font-display font-semibold text-white">Control Room</a>
+                        </div>
 
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <ul>
-            {% if session.get('team') %}
-            <li><a href="/team/{{ session.get('team') }}">Team</a></li>
-            {% endif %}
-            <li><a href="/game">Game</a></li>
-            <li><a href="/schedule">Schedule</a></li>
-            <li><a href="/leaderboard">Leaderboard</a></li>
-            {% if session.get('team') %}
-            <li>
-                <form method="POST" action="/logout" style="display:inline;"><button type="submit"
-                        class="logout-btn">Log out</button></form>
-            </li>
-            {% else %}
-            <li><a href="/login">Login</a></li>
-            {% endif %}
-        </ul>
-    </nav>
+                        <div
+                            class="order-2 flex h-10 w-full flex-nowrap items-center gap-3 border-t border-white/10 pt-3 sm:border-0 sm:pt-0 lg:order-none lg:w-auto">
+                            {% if session.get('team') %}
+                            <div class="flex-1 items-center rounded-2xl px-3 text-s">
+                                <span class="text-white/70">Signed in</span>
+                                <span class="font-semibold text-white px-3">{{ session.get('team') }}</span>
+                            </div>
 
+                            <form method="POST" action="{{ url_for('logout_post') }}" class="flex items-center">
+                                <button type="submit" class="secondary-btn h-10 px-4">Log out</button>
+                            </form>
 
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <div class="flash-messages">
-        {% for message in messages %}
-        <div class="flash">{{ message }}</div>
-        {% endfor %}
+                            {% else %}
+                            <a class="primary-btn shrink-0" href="{{ url_for('login_get') }}">Sign in</a>
+                            {% endif %}
+                        </div>
+
+                        <nav class="nav-scroll order-3 lg:order-none">
+                            {% set current = request.path %}
+                            {% if session.get('team') %}
+                            <a href="{{ url_for('team_get', team_name=session.get('team')) }}"
+                                class="nav-pill {{ 'is-active' if current.startswith('/team') }}">Team</a>
+                            {% endif %}
+                            <a href="{{ url_for('game_get') }}"
+                                class="nav-pill {{ 'is-active' if current.startswith('/game') }}">Game</a>
+                            <a href="{{ url_for('schedule_get') }}"
+                                class="nav-pill {{ 'is-active' if current.startswith('/schedule') }}">Schedule</a>
+                            <a href="{{ url_for('leaderboard_get') }}"
+                                class="nav-pill {{ 'is-active' if current.startswith('/leaderboard') or current == '/' }}">Leaderboard</a>
+                            {% if not session.get('team') %}
+                            <a href="{{ url_for('login_get') }}"
+                                class="nav-pill {{ 'is-active' if current.startswith('/login') }}">Login</a>
+                            {% endif %}
+                        </nav>
+                    </div>
+                </div>
+            </header>
+
+            <main class="mx-auto w-full max-w-6xl flex-1 px-4 pb-12 sm:px-6">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <div class="space-y-3 pb-6">
+                    {% for message in messages %}
+                    <div class="rounded-2xl border border-brand-400/40 bg-brand-500/10 px-4 py-3 text-brand-100">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </main>
+
+            <footer class="border-t border-white/5 py-6 text-center text-sm text-slate-400">
+                <p>Hackapong · Tournament control dashboard</p>
+            </footer>
+        </div>
     </div>
-    {% endif %}
-    {% endwith %}
-
-    {% block content %}{% endblock %}
 </body>
 
 </html>

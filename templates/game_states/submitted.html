@@ -2,10 +2,16 @@
 
 
 {% block content %}
-<div class="game-container">
-    <p>Scores have been submitted.</p>
-    <p>Waiting for other team to verify that</p>
-    <p> {{ game.team_a.name }} vs {{ game.team_b.name }} ended</p>
-    <p>({{ game.team_a_score}} : {{ game.team_b_score }}).</p>
+<div class="mx-auto max-w-3xl">
+    <div class="panel text-center space-y-4">
+        <p class="section-subtitle">Awaiting confirmation</p>
+        <h1 class="page-heading">Score submitted</h1>
+        <p class="text-base text-slate-300">We’ll finalize as soon as the opposing captain submits the same numbers.</p>
+        <div class="rounded-3xl border border-white/10 bg-white/5 px-6 py-5">
+            <p class="text-sm text-white/60">{{ game.team_a.name }} vs {{ game.team_b.name }}</p>
+            <p class="text-4xl font-display text-white">{{ game.team_a_score }} — {{ game.team_b_score }}</p>
+        </div>
+        <p class="text-xs uppercase tracking-[0.3em] text-white/60">Sit tight</p>
+    </div>
 </div>
 {% endblock %}

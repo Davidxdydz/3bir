@@ -2,11 +2,14 @@
 
 
 {% block content %}
-<div class="game-container">
-    <h2> Match found!</h2>
-    <p>{{ game.team_a.name }} against {{ game.team_b.name }}</p>
-    <p>scheduled for {{ game.start_time }}</p>
-    <p>remaining time :[[TODO]] minutes </p>
-
+<div class="mx-auto max-w-3xl">
+    <div class="panel text-center space-y-4">
+        <p class="section-subtitle">Match found</p>
+        <h1 class="page-heading">{{ game.team_a.name }} vs {{ game.team_b.name }}</h1>
+        <p class="text-base text-slate-300">Warm up and get ready to confirm table setup when prompted. Both teams must
+            ready up before the clock starts.</p>
+        <div class="info-banner">Scheduled start: {{ game.start_time or 'Shortly' }}</div>
+        <p class="text-xs uppercase tracking-[0.3em] text-white/60">Stand by for ready check</p>
+    </div>
 </div>
 {% endblock %}

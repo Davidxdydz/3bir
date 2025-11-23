@@ -1,28 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
+<div class="grid gap-8 lg:grid-cols-2">
+    <section class="panel">
+        <p class="section-subtitle">Welcome back</p>
+        <h1 class="page-heading">Log in</h1>
+        <p class="muted">Submit scores and review standings from this dashboard.</p>
 
-    <!-- Login Section -->
-    <div class="box">
-        <h2>Login</h2>
-        <form method="POST" action="/login">
-            <input type="text" name="username" placeholder="Username" required />
-            <input type="password" name="password" placeholder="Password" required />
-            <button type="submit" name="login">Login</button>
+        <form method="POST" action="{{ url_for('login_post') }}" class="space-y-4">
+            <div>
+                <label class="form-label">Team name</label>
+                <input type="text" name="username" required class="form-input"
+                    placeholder="Enter your registered team" />
+            </div>
+            <div>
+                <label class="form-label">Password</label>
+                <input type="password" name="password" required class="form-input" placeholder="••••••••" />
+            </div>
+            <button type="submit" name="login" class="primary-btn w-full py-3 text-base">Log in</button>
         </form>
-    </div>
+    </section>
 
-    <!-- Register Section -->
-    <div class="box">
-        <h2>Register</h2>
-        <form method="POST" action="/login">
-            <input type="text" name="username" placeholder="Username" required />
-            <input type="password" name="password" placeholder="Password" required />
-            <input type="password" name="confirm_password" placeholder="Repeat Password" required />
-            <button type="submit" name="register">Register</button>
+    <section class="panel">
+        <p class="section-subtitle">New team</p>
+        <h2 class="page-heading text-3xl">Create a team</h2>
+        <p class="muted">Register once and keep the same credentials for the rest of the event.</p>
+
+        <form method="POST" action="{{ url_for('login_post') }}" class="space-y-4">
+            <div>
+                <label class="form-label">Team name</label>
+                <input type="text" name="username" required class="form-input" placeholder="Enter team name" />
+            </div>
+            <div>
+                <label class="form-label">Password</label>
+                <input type="password" name="password" required class="form-input" placeholder="Create a password" />
+            </div>
+            <div>
+                <label class="form-label">Confirm password</label>
+                <input type="password" name="confirm_password" required class="form-input"
+                    placeholder="Repeat password" />
+            </div>
+            <button type="submit" name="register" class="secondary-btn w-full py-3 text-base">Register team</button>
         </form>
-    </div>
-
+    </section>
 </div>
 {% endblock %}
