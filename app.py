@@ -312,6 +312,7 @@ def game_post():
             game.team_a_score = int(request.form["team_a_score"])
             game.team_b_score = int(request.form["team_b_score"])
             request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect=None)
+    return "", 200
 
 
 @app.get("/team/<string:team_name>")
