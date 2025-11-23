@@ -12,4 +12,4 @@ result
 .idea/
 *.log
 npm-debug.log*
-static/css/main.css.map
+static/css/*
