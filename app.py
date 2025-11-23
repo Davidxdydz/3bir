@@ -110,7 +110,9 @@ class Game:
 
     @property
     def expected_end_time(self):
-        return self.expected_start_time + game_length
+        if self.start_time is None:
+            return self.expected_start_time + game_length
+        return self.start_time + game_length
 
     def get_ready(self):
         self.team_a.state = TeamState.READY_REQUEST
