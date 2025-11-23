@@ -11,11 +11,17 @@
         <li>PLACEHOLDER</li>
         <li>PLACEHOLDER</li>
     </ul>
-    <p>setup time is up [[TIMER: PLACEHOLDER]]</p>
+    <p>setup time is up in: <div id="timer">00:00:00</div></p>
 
 
     <form method="POST" action="/game">
         <button type="submit" name="ready" class="btn-ready" disabled>We are ready!</button>
     </form>
 </div>
+<script>
+    let displayElement = document.getElementById("timer");
+    let targetTime = new Date("{{ game.expected_start_time }}");
+
+    {% include 'countdown_function.js' %}
+</script>
 {% endblock %}
