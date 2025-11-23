@@ -32,6 +32,7 @@
           # Runtime dependencies
           propagatedBuildInputs = [
             pkgs.python312Packages.flask
+            pkgs.python312Packages.flask-socketio
             pkgs.python312Packages.waitress
           ];
 
@@ -54,7 +55,7 @@
               cp -r static $out/lib/${pkgs.python312Packages.python.libPrefix}/site-packages/
             fi
             makeWrapper ${pkgs.python312Packages.waitress}/bin/waitress-serve $out/bin/start-server \
-                --prefix PYTHONPATH : "$out/lib/${pkgs.python312Packages.python.libPrefix}/site-packages" \
+                --prefix PYTHONPATH : "$out/lib/${pkgs.python312Packages.python.libPrefix}/site-packages:$PYTHONPATH" \
                 --add-flags "--port=8080" \
                 --add-flags "app:app"
           '';
@@ -75,7 +76,21 @@
             bir3
           ];
         };
-        packages.default = bir3;
+        packages = {
+          default = bir3;
+          dockerImage = pkgs.dockerTools.streamLayeredImage {
+            name = "bir3";
+            tag = "latest";
+            contents = [ bir3 ];
+            config = {
+              Cmd = [ "${bir3}/bin/start-server" ];
+              ExposedPorts = {
+                "8080/tcp" = { };
+              };
+            };
+          };
+        };
+
         apps.default = {
           type = "app";
           program = "${bir3}/bin/start-server";
