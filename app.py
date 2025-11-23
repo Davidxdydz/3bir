@@ -34,14 +34,15 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         console.log("Should refresh:", shouldRefresh);
 
-        if (shouldRefresh) {
-            console.log("Refreshing page:", currentPage);
-            window.location.reload();
+        if (data.redirect) {
+            console.log("Redirecting to:", data.redirect);
+            window.location.href = data.redirect;
             return;
         }
 
-        if (data.redirect) {
-            window.location.href = data.redirect;
+        if (shouldRefresh) {
+            console.log("Refreshing page:", currentPage);
+            window.location.reload();
             return;
         }
     });
@@ -147,6 +148,80 @@ class Manager:
             raise Exception("There is already an active game")
         exec_at(game.get_ready_time, game.get_ready)
 
+    def add_team(self, team: Team):
+        self.teams[team.name] = team
+
+    def set_team_state(self, team_name: str, state: TeamState):
+        self.teams[team_name].state = state
+
+    def add_searching_team(self, team_name: str):
+        self.set_team_state(team_name, TeamState.SEARCHING)
+        self.searching_teams.add(team_name)
+
+    def try_match_teams(self):
+        if len(self.searching_teams) >= 2:
+            team_a = self.teams[self.searching_teams.pop()]
+            team_b = self.teams[self.searching_teams.pop()]
+            game = Game(
+                team_a=team_a,
+                team_b=team_b,
+            )
+            self.schedule_game(game)
+            team_a.state = TeamState.MATCHED
+            team_b.state = TeamState.MATCHED
+            request_refresh({team_a.name, team_b.name}, ["/game"], redirect="/game")
+
+    def set_team_ready(self, team_name: str):
+        self.set_team_state(team_name, TeamState.READY)
+        game = self.table.active_game
+        both_ready = game.team_a.state == TeamState.READY and game.team_b.state == TeamState.READY
+        if both_ready:
+            game.team_a.state = TeamState.PLAYING
+            game.team_b.state = TeamState.PLAYING
+            game.start_time = datetime.now()
+        request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
+
+    def set_team_done(self, team_name: str):
+        self.set_team_state(team_name, TeamState.DONE)
+        game = self.table.active_game
+        both_done = game.team_a.state == TeamState.DONE and game.team_b.state == TeamState.DONE
+        if both_done:
+            game.team_a.state = TeamState.SUBMIT_REQUEST
+            game.team_b.state = TeamState.SUBMIT_REQUEST
+            game.end_time = datetime.now()
+        request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
+
+    def set_team_submitted(self, team_name: str):
+        self.set_team_state(team_name, TeamState.SUBMITTED)
+        game = self.table.active_game
+        both_submitted = game.team_a.state == TeamState.SUBMITTED and game.team_b.state == TeamState.SUBMITTED
+        if both_submitted:
+            sa = int(request.form["team_a_score"])
+            sb = int(request.form["team_b_score"])
+            if sa == game.team_a_score and sb == game.team_b_score:
+                game.end_time = datetime.now()
+                game.team_a.state = TeamState.INACTIVE
+                game.team_b.state = TeamState.INACTIVE
+                self.past_games.append(game)
+                self.table.active_game = None
+                request_refresh({game.team_a.name, game.team_b.name}, ["*"], redirect="/result")
+                request_refresh([None], ["/leaderboard"], redirect=None)
+                update_elo(game)
+                return redirect(url_for("result_get"))
+            else:
+                flash("Scores do not match, please resubmit")
+                game.team_a.state = TeamState.SUBMIT_REQUEST
+                game.team_b.state = TeamState.SUBMIT_REQUEST
+                request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
+        else:
+            game.team_a_score = int(request.form["team_a_score"])
+            game.team_b_score = int(request.form["team_b_score"])
+
+    def set_about(self, team_name: str, about: str):
+        self.teams[team_name].about = about
+        request_refresh({team_name}, ["/team/" + team_name], redirect=None)
+        request_refresh([None], ["/team/" + team_name], redirect=None)
+
 
 app = Flask(__name__)
 app.secret_key = "your-secret-key"
@@ -217,7 +292,7 @@ def login_post():
             flash(error)
             return redirect(url_for("login_get"))
         new_team = Team(name=username, password=password)
-        manager.teams[new_team.name] = new_team
+        manager.add_team(new_team)
         session["team"] = new_team.name
     elif "login" in request.form:
         username = request.form["username"]
@@ -308,66 +383,20 @@ def game_post():
     if team_name is None:
         flash("You must be logged in to perform this action")
         return redirect(url_for("login_get"))
-    team = manager.teams.get(team_name)
+    # team = manager.teams.get(team_name)
 
     if "start_search" in request.form:
-        team.state = TeamState.SEARCHING
-        manager.searching_teams.add(team.name)
-        if len(manager.searching_teams) >= 2:
-            team_a = manager.teams[manager.searching_teams.pop()]
-            team_b = manager.teams[manager.searching_teams.pop()]
-            game = Game(
-                team_a=team_a,
-                team_b=team_b,
-            )
-            manager.schedule_game(game)
-            team_a.state = TeamState.MATCHED
-            team_b.state = TeamState.MATCHED
-            request_refresh({team_a.name, team_b.name}, ["/game"], redirect="/game")
+        manager.add_searching_team(team_name)
+        manager.try_match_teams()
     if "ready" in request.form:
-        team.state = TeamState.READY
-        game = manager.table.active_game
-        both_ready = game.team_a.state == TeamState.READY and game.team_b.state == TeamState.READY
-        if both_ready:
-            game.team_a.state = TeamState.PLAYING
-            game.team_b.state = TeamState.PLAYING
-            game.start_time = datetime.now()
-        request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
+        manager.set_team_ready(team_name)
     if "done" in request.form:
-        team.state = TeamState.DONE
-        game = manager.table.active_game
-        both_done = game.team_a.state == TeamState.DONE and game.team_b.state == TeamState.DONE
-        if both_done:
-            game.team_a.state = TeamState.SUBMIT_REQUEST
-            game.team_b.state = TeamState.SUBMIT_REQUEST
-            game.end_time = datetime.now()
-        request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
+        manager.set_team_done(team_name)
     if "submit" in request.form:
-        team.state = TeamState.SUBMITTED
-        game = manager.table.active_game
-        both_submitted = game.team_a.state == TeamState.SUBMITTED and game.team_b.state == TeamState.SUBMITTED
-        if both_submitted:
-            sa = int(request.form["team_a_score"])
-            sb = int(request.form["team_b_score"])
-            if sa == game.team_a_score and sb == game.team_b_score:
-                game.end_time = datetime.now()
-                game.team_a.state = TeamState.INACTIVE
-                game.team_b.state = TeamState.INACTIVE
-                manager.past_games.append(game)
-                manager.table.active_game = None
-                request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
-                request_refresh([None], ["/leaderboard"], redirect=None)
-                # TODO win page
-                update_elo(game)
-            else:
-                flash("Scores do not match, please resubmit")
-                game.team_a.state = TeamState.SUBMIT_REQUEST
-                game.team_b.state = TeamState.SUBMIT_REQUEST
-                request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
-        else:
-            game.team_a_score = int(request.form["team_a_score"])
-            game.team_b_score = int(request.form["team_b_score"])
-            # request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
+        ret = manager.set_team_submitted(team_name)
+        if ret is not None:
+            print(ret)
+            return ret
     return redirect(url_for("game_get"))
 
 
@@ -393,9 +422,7 @@ def team_post(team_name: str):
         return redirect(url_for("team_get", team_name=team_name))
     team = manager.teams.get(team_name)
     if "about" in request.form:
-        team.about = request.form["about"]
-        request_refresh({team_name}, ["/team/" + team_name], redirect=None)
-        request_refresh([None], ["/team/" + team_name], redirect=None)
+        manager.set_about(team_name, request.form["about"])
     return redirect(url_for("team_get", team_name=team_name))
 
 
@@ -429,13 +456,10 @@ def result_get():
         return redirect(url_for("game_get"))
     if latest_game.team_a_score > latest_game.team_b_score:
         winner = latest_game.team_a.name
-        loser = latest_game.team_b.name
     elif latest_game.team_a_score < latest_game.team_b_score:
         winner = latest_game.team_b.name
-        loser = latest_game.team_a.name
     else:
         winner = None
-        loser = None
     if winner is None:
         return render_template("draw.html", game=latest_game, team=manager.teams[team_name])
     if team_name == winner:
