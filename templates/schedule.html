@@ -8,23 +8,23 @@
         <thead>
             <tr>
                 <th>Time</th>
-                <th>Team 1</th>
-                <th>Team 2</th>
+                <th>Team A</th>
+                <th>Team B</th>
             </tr>
         </thead>
         <tbody>
             {% if table.active_game %}
             <tr>
-                <td>{{ table.active_game.time }}</td>
-                <td>{{ table.active_game.team1.name }}</td>
-                <td>{{ table.active_game.team2.name }}</td>
+                <td>{{ table.active_game.start_time }}</td>
+                <td>{{ table.active_game.team_a.name }}</td>
+                <td>{{ table.active_game.team_b.name }}</td>
             </tr>
             {% endif %}
             {% for game in table.scheduled_games %}
             <tr>
-                <td>{{ game.time }}</td>
-                <td>{{ game.team1.name }}</td>
-                <td>{{ game.team2.name }}</td>
+                <td>{{ game.start_time }}</td>
+                <td>{{ game.team_a.name }}</td>
+                <td>{{ game.team_b.name }}</td>
             </tr>
             {% endfor %}
         </tbody>
