@@ -7,4 +7,18 @@
     <p>ELO: {{ team.elo }}</p>
     <p>Status: {{ team.state }}</p>
 </div>
+{% if editable %}
+<p>About this team</p>
+{% endif %}
+
+{% if editable %}
+<div class="team.about">
+    <h3>About this team</h3>
+    <!-- gives an error message that I can only edit my own team -->
+    <form method="POST" action="/team/{{ team.about }}/edit">
+        <input type="text" name="about" id="about" placeholder="About this team" value="{{ team.about }}" />
+        <button type="submit">Update</button>
+    </form>
+</div>
+{% endif %}
 {% endblock %}
