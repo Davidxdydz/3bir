@@ -7,7 +7,7 @@ node_modules/
 .venv/
 .env
 .DS_Store
-package-lock.json
+result
 .vscode/
 .idea/
 *.log
