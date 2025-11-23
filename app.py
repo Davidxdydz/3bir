@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, flash, redirect, request, url_for, session
 import flask
 from flask_socketio import SocketIO
@@ -9,28 +9,45 @@ import functools
 
 sock = """<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const socket = io();  // connects to the same origin automatically
+document.addEventListener("DOMContentLoaded", () => {
+    const socket = io();  // connects to the same origin automatically
 
-        socket.on("connect", () => {
-            console.log("Connected with SID:", socket.id);
-        });
-
-        socket.on("refresh", (data) => {
-            console.log("Refresh event:", data);
-            let currentPage = window.location.pathname.split("/").pop();
-            if (data.pages.includes(currentPage) || data.pages.includes("*")) {
-                console.log("Refreshing page:", currentPage);
-                window.location.reload();
-                return;
-            }
-            if (data.redirect) {
-                window.location.href = data.redirect;
-                return;
-            }            
-        });
+    socket.on("connect", () => {
+        console.log("Connected with SID:", socket.id);
     });
-</script>"""
+
+    socket.on("refresh", (data) => {
+        console.log("Refresh event:", data);
+
+        let pathParts = window.location.pathname.split("/").filter(Boolean);
+        let currentPage = "/" + pathParts.join("/"); // full path like "/a/b"
+        console.log("Current page:", currentPage);
+
+        let shouldRefresh = data.pages.some(page => {
+            if (page === "*") return true; // always refresh
+            // exact match
+            if (page === currentPage) return true;
+            // prefix match for first segment
+            let pageParts = page.split("/").filter(Boolean);
+            if (pageParts.length === 1 && pageParts[0] === pathParts[0]) return true;
+            return false;
+        });
+        console.log("Should refresh:", shouldRefresh);
+
+        if (shouldRefresh) {
+            console.log("Refreshing page:", currentPage);
+            window.location.reload();
+            return;
+        }
+
+        if (data.redirect) {
+            window.location.href = data.redirect;
+            return;
+        }
+    });
+});
+</script>
+"""
 
 
 @functools.wraps(flask.render_template)
@@ -73,6 +90,10 @@ class Game:
     end_time: datetime = None
     team_a_score: int = 0
     team_b_score: int = 0
+
+    @property
+    def get_ready_time(self) -> datetime:
+        return self.start_time - timedelta(minutes=3)
 
 
 @dataclass
@@ -268,7 +289,7 @@ def game_post():
             manager.schedule_game(game)
             team_a.state = TeamState.MATCHED
             team_b.state = TeamState.MATCHED
-            request_refresh({team_a.name, team_b.name}, ["game"], redirect="/game")
+            request_refresh({team_a.name, team_b.name}, ["/game"], redirect="/game")
     if "ready" in request.form:
         team.state = TeamState.READY
         game = manager.table.active_game
@@ -276,7 +297,7 @@ def game_post():
         if both_ready:
             game.team_a.state = TeamState.PLAYING
             game.team_b.state = TeamState.PLAYING
-            request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect="/game")
+            request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
     if "done" in request.form:
         team.state = TeamState.DONE
         game = manager.table.active_game
@@ -284,7 +305,7 @@ def game_post():
         if both_done:
             game.team_a.state = TeamState.SUBMIT_REQUEST
             game.team_b.state = TeamState.SUBMIT_REQUEST
-            request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect="/game")
+            request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
     if "submit" in request.form:
         team.state = TeamState.SUBMITTED
         game = manager.table.active_game
@@ -299,19 +320,19 @@ def game_post():
                     game.team_b.state = TeamState.INACTIVE
                     manager.past_games.append(game)
                     manager.table.active_game = None
-                    request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect=None)
-                    request_refresh(None, ["leaderboard"], redirect=None)
+                    request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
+                    request_refresh([None], ["leaderboard"], redirect=None)
                     # TODO win page, elo updates
                     update_elo(game)
                 else:
                     flash("Scores do not match, please resubmit")
                     game.team_a.state = TeamState.SUBMIT_REQUEST
                     game.team_b.state = TeamState.SUBMIT_REQUEST
-                    request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect="/game")
+                    request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect="/game")
         else:
             game.team_a_score = int(request.form["team_a_score"])
             game.team_b_score = int(request.form["team_b_score"])
-            request_refresh({game.team_a.name, game.team_b.name}, ["game"], redirect=None)
+            request_refresh({game.team_a.name, game.team_b.name}, ["/game"], redirect=None)
     return "", 200
 
 
@@ -329,14 +350,17 @@ def team_get(team_name: str):
 @app.post("/team/<string:team_name>")
 def team_post(team_name: str):
     self_team_name = session.get("team")
+    if self_team_name is None:
+        flash("You must be logged in to perform this action")
+        return redirect(url_for("login_get"))
     if team_name != self_team_name:
         flash("You can only edit your own team")
         return redirect(url_for("team_get", team_name=team_name))
     team = manager.teams.get(team_name)
     if "about" in request.form:
         team.about = request.form["about"]
-        request_refresh({team_name}, ["team/" + team_name], redirect=None)
-        request_refresh(None, ["team/" + team_name], redirect=None)
+        request_refresh({team_name}, ["/team/" + team_name], redirect=None)
+        request_refresh([None], ["/team/" + team_name], redirect=None)
     return redirect(url_for("team_get", team_name=team_name))
 
 

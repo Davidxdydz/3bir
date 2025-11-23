@@ -11,14 +11,14 @@
 <p>About this team</p>
 {% endif %}
 
-{% if editable %}
 <div class="team.about">
-    <h3>About this team</h3>
+    <h3>{{team.about}}</h3>
     <!-- gives an error message that I can only edit my own team -->
-    <form method="POST" action="/team/{{ team.about }}/edit">
+    {% if editable %}
+    <form method="POST" action="/team/{{ team.name }}">
         <input type="text" name="about" id="about" placeholder="About this team" value="{{ team.about }}" />
         <button type="submit">Update</button>
     </form>
+    {% endif %}
 </div>
-{% endif %}
 {% endblock %}
