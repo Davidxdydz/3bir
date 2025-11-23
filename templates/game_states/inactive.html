@@ -2,4 +2,14 @@
 
 
 {% block content %}
+
+<div class="game-container">
+    <h2>No active game</h2>
+    <p>You are currently not in a game.</p>
+    <p>Click below to start searching for an opponent.</p>
+    <form method="POST" action="/game">
+        <button type="submit" name="start_search" class="btn-search">Searching for opponent...</button>
+    </form>
+</div>
+
 {% endblock %}

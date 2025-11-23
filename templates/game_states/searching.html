@@ -2,4 +2,16 @@
 
 
 {% block content %}
+<div class="game-container">
+    <h2>No active game</h2>
+    <p>You are currently not in a game.</p>
+    <form method="POST" action="/game">
+        <button type="submit" class="btn-search" disabled>Searching for opponent...</button>
+    </form>
+    <!-- todo spinner -->
+    <!-- <div class="spinner-container">
+        <div class="spinner"></div>
+        <p>Searching for opponent...</p>
+    </div> -->
+</div>
 {% endblock %}
