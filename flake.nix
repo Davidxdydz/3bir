@@ -33,7 +33,7 @@
           propagatedBuildInputs = [
             pkgs.python312Packages.flask
             pkgs.python312Packages.flask-socketio
-            pkgs.python312Packages.waitress
+            pkgs.python312Packages.gunicorn
           ];
 
           # This is the magic step.
@@ -57,10 +57,11 @@
             if [ -d static ]; then
               cp -r static $out/lib/${pkgs.python312Packages.python.libPrefix}/site-packages/
             fi
-            makeWrapper ${pkgs.python312Packages.waitress}/bin/waitress-serve $out/bin/start-server \
-                --prefix PYTHONPATH : "$out/lib/${pkgs.python312Packages.python.libPrefix}/site-packages:$PYTHONPATH" \
-                --add-flags "--port=8080" \
-                --add-flags "app:app"
+             makeWrapper ${pkgs.python312Packages.gunicorn}/bin/gunicorn $out/bin/start-server \
+                 --prefix PYTHONPATH : "$out/lib/${pkgs.python312Packages.python.libPrefix}/site-packages:$PYTHONPATH" \
+                 --add-flags "-w 4" \
+                 --add-flags "--bind 0.0.0.0:8080" \
+                 --add-flags "app:app"
           '';
         };
         tailwindDeps = pkgs.buildNpmPackage {
@@ -104,14 +105,14 @@
       {
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            (python312.withPackages (
-              pp: with pp; [
-                flask
-                flask-socketio
-                build
-                waitress
-              ]
-            ))
+             (python312.withPackages (
+               pp: with pp; [
+                 flask
+                 flask-socketio
+                 build
+                 gunicorn
+               ]
+             ))
             pyright
             bir3
             nodejs

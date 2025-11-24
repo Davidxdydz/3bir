@@ -5,7 +5,7 @@ description = "Beer Pong Matchmaking and Tournament App"
 dependencies = [
     "flask",
     "flask-socketio",
-    "waitress"
+    "gunicorn",
 ]
 
 [build-system]
